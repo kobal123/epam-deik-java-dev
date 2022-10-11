@@ -1,23 +1,39 @@
 package com.epam.training.ticketservice.user;
 
-import java.util.List;
+import javax.persistence.*;
 import java.util.Set;
 
-
+@Entity
+@Table(name = "user_table")
 public class User {
-    private final String name;
-    private Set<Authority> authorities;
+    @Id
+    private String name;
+    private String password;
 
-    public User(String name, Set<Authority> authorities) {
+    @ElementCollection(targetClass = Role.class)
+    @CollectionTable
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles;
+
+    public User(String name,String password, Set<Role> roles) {
         this.name = name;
-        this.authorities = authorities;
+        this.password=password;
+        this.roles = roles;
+    }
+
+    public User() {
+
     }
 
     public String getName() {
         return name;
     }
 
-    public Set<Authority> getAuthorities() {
-        return authorities;
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }
