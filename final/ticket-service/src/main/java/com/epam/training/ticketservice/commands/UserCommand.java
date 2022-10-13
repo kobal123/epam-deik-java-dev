@@ -1,5 +1,6 @@
 package com.epam.training.ticketservice.commands;
 
+import com.epam.training.ticketservice.security.SecurityContext;
 import com.epam.training.ticketservice.user.UserService;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -28,8 +29,8 @@ public class UserCommand {
 
     @ShellMethod(value = "Gives information about the currently logged in account", key = "describe account")
     public String describeAccount() {
-        if (userService.isUserLoggedIn()) {
-            return String.format("Signed in with privileged account '%s'",userService.getCurrentUser().get().getName());
+        if (SecurityContext.USER.isUserLoggedIn()) {
+            return String.format("Signed in with privileged account '%s'",SecurityContext.USER.getUser().get().getName());
         } else {
             return "You are not signed in";
         }
