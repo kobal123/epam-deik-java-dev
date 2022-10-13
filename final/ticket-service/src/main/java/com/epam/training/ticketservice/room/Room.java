@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.util.Objects;
 
 @Entity
 @Table(name = "room_table")
@@ -39,5 +40,18 @@ public class Room {
 
     public int getCapacity() {
         return seatRows*seatCols;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Room room = (Room) o;
+        return seatRows == room.seatRows && seatCols == room.seatCols && Objects.equals(name, room.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, seatRows, seatCols);
     }
 }
