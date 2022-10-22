@@ -7,12 +7,8 @@ import org.springframework.shell.jline.PromptProvider;
 @Configuration
 public class TicketServicePrompt implements PromptProvider {
 
-
-        @Override
-        public final AttributedString getPrompt() {
-
-            return new AttributedString("Ticket service>");
-
-        }
-
+    @Override
+    public final AttributedString getPrompt() {
+        return new AttributedString("Ticket service>");
+    }
 }

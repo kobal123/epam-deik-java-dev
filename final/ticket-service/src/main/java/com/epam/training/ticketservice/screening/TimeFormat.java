@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 public class TimeFormat {
 
     @Bean
-    public DateTimeFormatter formatter(){
+    public DateTimeFormatter formatter() {
         return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     }
 }

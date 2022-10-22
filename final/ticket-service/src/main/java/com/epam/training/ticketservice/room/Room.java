@@ -39,7 +39,7 @@ public class Room {
     }
 
     public int getCapacity() {
-        return seatRows*seatCols;
+        return seatRows * seatCols;
     }
 
     @Override

@@ -14,6 +14,7 @@ import java.util.List;
 
 @ShellComponent
 public class RoomCommand {
+
     private final RoomService roomService;
     private final UserService userService;
 
@@ -22,23 +23,21 @@ public class RoomCommand {
         this.userService = userService;
     }
 
-    @ShellMethodAvailability("isAdmin")
     @ShellMethod(value = "Create a new room", key = "create room")
     void createRoom(String name, int numOfRows, int numOfCols) {
         Room room = new Room(name,numOfRows,numOfCols);
         roomService.createRoom(room);
     }
 
-    @ShellMethodAvailability("isAdmin")
     @ShellMethod(value = "Update a room", key = "update room")
     void updateRoom(String name, int numOfRows, int numOfCols) {
         Room room = new Room(name,numOfRows,numOfCols);
         roomService.updateRoom(room);
 
     }
-    @ShellMethodAvailability("isAdmin")
+
     @ShellMethod(value = "Delete a room", key = "delete room")
-    void deleteRoom(String name){
+    void deleteRoom(String name) {
         roomService.deleteRoomByName(name);
     }
 
@@ -49,10 +48,18 @@ public class RoomCommand {
             System.out.println("There are no rooms at the moment");
         } else {
             String format = "Room %s with %d seats, %d rows and %d columns";
-            rooms.forEach(room -> System.out.println(String.format(format, room.getName(), room.getCapacity(), room.getSeatRows(), room.getSeatCols())));
+            rooms.forEach(room -> System.out.println(String.format(format,
+                    room.getName(),
+                    room.getCapacity(),
+                    room.getSeatRows(),
+                    room.getSeatCols())));
         }
     }
+
+    @ShellMethodAvailability({"deleteRoom","updateRoom","createRoom"})
     public Availability isAdmin() {
-        return SecurityContext.USER.currentUserHasRole(Role.ADMIN) ? Availability.available() : Availability.unavailable("User is not an admin");
+        return SecurityContext.USER.currentUserHasRole(Role.ADMIN)
+                ? Availability.available()
+                : Availability.unavailable("User is not an admin");
     }
 }

@@ -19,10 +19,10 @@ public enum SecurityContext {
     }
 
     public boolean currentUserHasRole(Role role) {
-        return user.isPresent() && user.get().getRoles().contains(role);
+        return user.isPresent() && user.get().getRole().contains(role);
     }
 
-    public boolean isUserLoggedIn(){
+    public boolean isUserLoggedIn() {
         return user.isPresent();
     }
 }

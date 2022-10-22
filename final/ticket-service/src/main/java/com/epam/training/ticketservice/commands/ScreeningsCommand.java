@@ -15,7 +15,6 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 
 import java.text.Collator;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -25,24 +24,27 @@ public class ScreeningsCommand {
     private final ScreeningService screeningService;
     private final MovieService movieService;
     private final DateTimeFormatter dateTimeFormatter;
-    public ScreeningsCommand(ScreeningService screeningService, MovieService movieService, DateTimeFormatter dateTimeFormatter) {
+
+    public ScreeningsCommand(ScreeningService screeningService,
+                             MovieService movieService,
+                             DateTimeFormatter dateTimeFormatter) {
         this.screeningService = screeningService;
         this.movieService = movieService;
         this.dateTimeFormatter = dateTimeFormatter;
     }
 
     @ShellMethod(value = "List all screenings", key = "list screenings")
-    void ListScreenings() {
+    void listScreenings() {
         List<Screening> screenings = screeningService.getAllScreenings();
         screenings.sort(Comparator.comparing(Screening::getMovieTitle,Collator.getInstance()));
-        if(screenings.isEmpty()){
+        if (screenings.isEmpty()) {
             System.out.println("There are no screenings");
         }
 
         String format = "%s (%s, %d minutes), screened in room %s, at %s";
         for (Screening screening : screenings) {
             Movie movie = movieService.getMovieByName(screening.getMovieTitle())
-                    .orElseThrow(()-> new RuntimeException("movie does not exists"));
+                    .orElseThrow(() -> new RuntimeException("movie does not exists"));
 
             String message = String.format(format,
                     movie.getName(),
@@ -80,8 +82,17 @@ public class ScreeningsCommand {
         screeningService.deleteScreening(movieTitle,roomName,startTime);
     }
 
+    @ShellMethodAvailability({"deleteScreening","updateScreening","createScreening"})
     public Availability isAdmin() {
-        return SecurityContext.USER.currentUserHasRole(Role.ADMIN) ? Availability.available() : Availability.unavailable("User is not an admin");
+        return SecurityContext.USER.currentUserHasRole(Role.ADMIN)
+                ? Availability.available()
+                : Availability.unavailable("User is not an admin");
+    }
+
+    public Availability isBasicUser() {
+        return SecurityContext.USER.currentUserHasRole(Role.USER)
+                ? Availability.available()
+                : Availability.unavailable("User is not a basic user.");
     }
 
 }

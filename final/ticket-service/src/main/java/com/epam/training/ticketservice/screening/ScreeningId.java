@@ -50,4 +50,16 @@ public class ScreeningId  implements Serializable {
     public LocalDateTime getStartTime() {
         return startTime;
     }
+
+    public void setMovieTitle(String movieTitle) {
+        this.movieTitle = movieTitle;
+    }
+
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
 }

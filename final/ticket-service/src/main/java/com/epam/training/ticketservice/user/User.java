@@ -4,26 +4,32 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "user_table")
-public class User {
+@Table(name = "appuser")
+public class User implements Serializable {
+
     @Id
     private String name;
     private String password;
-
+/*
     @ElementCollection(targetClass = Role.class)
     @CollectionTable
     @Enumerated(EnumType.STRING)
     @Fetch(FetchMode.JOIN)
-    private Set<Role> roles;
+   */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "Role", joinColumns = @JoinColumn(name = "id"))
+    @Enumerated(EnumType.STRING)
+    private Set<Role> role;
 
-    public User(String name,String password, Set<Role> roles) {
+    public User(String name,String password, Set<Role> role) {
         this.name = name;
-        this.password=password;
-        this.roles = roles;
+        this.password = password;
+        this.role = role;
     }
 
     public User() {
@@ -34,8 +40,8 @@ public class User {
         return name;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    public Set<Role> getRole() {
+        return role;
     }
 
     public String getPassword() {
@@ -47,11 +53,11 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(name, user.name) && Objects.equals(password, user.password) && Objects.equals(roles, user.roles);
+        return Objects.equals(name, user.name) && Objects.equals(password, user.password) && Objects.equals(role, user.role);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, password, roles);
+        return Objects.hash(name, password, role);
     }
 }

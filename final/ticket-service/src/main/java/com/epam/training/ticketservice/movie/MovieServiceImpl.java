@@ -23,7 +23,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public void deleteMovieByName(String name) {
         Optional<Movie> movie = movieRepository.findById(name);
-        if(movie.isEmpty()) {
+        if (movie.isEmpty()) {
             throw new RuntimeException("Movie does not exist" + movie);
         }
         movieRepository.deleteById(name);
@@ -36,7 +36,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Optional<Movie> getMovieByName(String name) {
-            return movieRepository.findById(name);
+        return movieRepository.findById(name);
     }
 
     @Override

@@ -2,9 +2,11 @@ package com.epam.training.ticketservice.movie;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
+@Table(name = "movies")
 public class Movie {
     @Id
     private String name;
