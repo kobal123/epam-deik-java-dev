@@ -4,6 +4,7 @@ import com.epam.training.ticketservice.booking.Booking;
 import com.epam.training.ticketservice.booking.BookingService;
 import com.epam.training.ticketservice.booking.Seat;
 import com.epam.training.ticketservice.screening.Screening;
+import com.epam.training.ticketservice.screening.ScreeningId;
 import com.epam.training.ticketservice.screening.ScreeningService;
 import com.epam.training.ticketservice.security.SecurityContext;
 import org.springframework.shell.standard.ShellComponent;
@@ -32,16 +33,10 @@ public class BookingCommand {
     void book(String movieTitle, String roomName, String startTime, String seats) {
         Set<Seat> setOfSeats = parseSeats(seats);
         System.out.println("seats are " + setOfSeats);
-        Booking booking = new Booking();
-        booking.setUsername(SecurityContext.USER.getUser().get().getName());
-//        booking.setMovieTitle(movieTitle);
-//        booking.setRoomName(roomName);
-//        booking.setStartTime(LocalDateTime.parse(startTime,dateTimeFormatter));
-        booking.setScreeningg(new Screening(movieTitle, roomName, LocalDateTime.parse(startTime,dateTimeFormatter)));
-        for (Seat seat : setOfSeats) {
-            seat.setBooking(booking);
-        }
-        booking.setSeats(setOfSeats);
+        Booking booking = new Booking(SecurityContext.USER.getUser().get().getName(),
+                new ScreeningId(movieTitle, roomName, LocalDateTime.parse(startTime,dateTimeFormatter)));
+
+
         bookingService.createBooking(booking);
     }
 

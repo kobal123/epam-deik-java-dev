@@ -1,6 +1,6 @@
 package com.epam.training.ticketservice.booking;
 
-import com.epam.training.ticketservice.screening.Screening;
+import com.epam.training.ticketservice.screening.ScreeningId;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -10,18 +10,7 @@ import java.util.Objects;
 
 public class BookingId implements Serializable {
     private String username;
-    private Screening screeningg;
-
-
-    public BookingId(String username, Screening screeningg) {
-
-        this.username = username;
-        this.screeningg = screeningg;
-    }
-
-    public BookingId() {
-
-    }
+    private ScreeningId screening;
 
     public String getUsername() {
         return username;
@@ -31,12 +20,12 @@ public class BookingId implements Serializable {
         this.username = username;
     }
 
-    public Screening getScreeningg() {
-        return screeningg;
+    public ScreeningId getScreeningId() {
+        return screening;
     }
 
-    public void setScreeningg(Screening screeningg) {
-        this.screeningg = screeningg;
+    public void setScreeningId(ScreeningId screening) {
+        this.screening = screening;
     }
 
     @Override
@@ -44,12 +33,12 @@ public class BookingId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BookingId bookingId = (BookingId) o;
-        return Objects.equals(username, bookingId.username) && Objects.equals(screeningg, bookingId.screeningg);
+        return Objects.equals(username, bookingId.username) && Objects.equals(screening, bookingId.screening);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, screeningg);
+        return Objects.hash(username, screening);
     }
 }
 

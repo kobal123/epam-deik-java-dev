@@ -62,4 +62,13 @@ public class ScreeningId  implements Serializable {
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
+
+    @Override
+    public String toString() {
+        return "ScreeningId{" +
+                "movieTitle='" + movieTitle + '\'' +
+                ", roomName='" + roomName + '\'' +
+                ", startTime=" + startTime +
+                '}';
+    }
 }

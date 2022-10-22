@@ -7,7 +7,6 @@ import java.util.Objects;
 @Entity
 //@Table(name = "seat",uniqueConstraints = @UniqueConstraint(columnNames = {"seatRow", "seatCol","booking_id"}))
 @IdClass(SeatId.class)
-
 public class Seat implements Serializable {
 
     @Id
@@ -15,14 +14,11 @@ public class Seat implements Serializable {
     @Id
     private Integer seatCol;
 
-    @Id
-    @ManyToOne(targetEntity = Booking.class)
-    //@JoinColumns({
-            @JoinColumn(name = "username", referencedColumnName = "username")
-            //@JoinColumn(name = "movieTitle", referencedColumnName = "movieTitle"),
-            //@JoinColumn(name = "roomName", referencedColumnName = "roomName"),
-            //@JoinColumn(name = "startTime", referencedColumnName = "startTime")
-    //})
+    @ManyToOne
+    @JoinColumns({
+            @JoinColumn(name = "booking_username"),
+            @JoinColumn(name = "booking_screening")
+    })
     private Booking booking;
 
     public Booking getBooking() {
@@ -33,6 +29,17 @@ public class Seat implements Serializable {
         this.booking = booking;
     }
 
+    /*   @Id
+       //@ManyToOne
+       @JoinColumns({
+           @JoinColumn(name = "username", referencedColumnName = "username"),
+           @JoinColumn(name = "screening", referencedColumnName = "screening")
+               //@JoinColumn(name = "movieTitle", referencedColumnName = "screening_movie_title"),
+           //@JoinColumn(name = "roomName", referencedColumnName = "screening_room_name"),
+           //@JoinColumn(name = "startTime", referencedColumnName = "screening_start_time")
+       })
+       private BookingId booking;
+   */
     public Seat() {
 
     }
@@ -46,10 +53,9 @@ public class Seat implements Serializable {
                 '}';
     }
 
-    public Seat(Integer seatRow, Integer seatCol, Booking booking) {
+    public Seat(Integer seatRow, Integer seatCol) {
         this.seatRow = seatRow;
         this.seatCol = seatCol;
-        this.booking = booking;
     }
 
     @Override
@@ -63,11 +69,6 @@ public class Seat implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(seatRow, seatCol);
-    }
-
-    public Seat(Integer seatRow, Integer seatCol) {
-        this.seatRow = seatRow;
-        this.seatCol = seatCol;
     }
 
     public Integer getSeatRow() {

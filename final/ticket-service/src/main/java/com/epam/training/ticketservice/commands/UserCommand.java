@@ -91,6 +91,6 @@ public class UserCommand {
         System.out.println("Your previous bookings are");
         String bookingFormat = "Seats %s, %s on %s in room %s starting at %s for %i HUF";
         bookings.forEach(System.out::println);
-        bookings.stream().map(Booking::getScreeningg).forEach(System.out::println);
+        bookings.stream().map(Booking::getScreeningId).forEach(System.out::println);
     }
 }

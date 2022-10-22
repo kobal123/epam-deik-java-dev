@@ -7,13 +7,13 @@ import java.util.Objects;
 public class SeatId implements Serializable {
     private Integer seatRow;
     private Integer seatCol;
-    private Booking booking;
+    private BookingId booking;
 
     public SeatId() {
 
     }
 
-    public SeatId(Integer seatRow, Integer seatCol, Booking booking) {
+    public SeatId(Integer seatRow, Integer seatCol, BookingId booking) {
         this.seatRow = seatRow;
         this.seatCol = seatCol;
         this.booking = booking;
@@ -48,11 +48,11 @@ public class SeatId implements Serializable {
         this.seatCol = seatCol;
     }
 
-    public Booking getBooking() {
+    public BookingId getBooking() {
         return booking;
     }
 
-    public void setBooking(Booking booking) {
+    public void setBooking(BookingId booking) {
         this.booking = booking;
     }
 }

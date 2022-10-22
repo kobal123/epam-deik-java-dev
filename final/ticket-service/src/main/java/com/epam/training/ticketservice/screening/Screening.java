@@ -4,11 +4,12 @@ import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.room.Room;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @IdClass(ScreeningId.class)
-public class Screening {
+public class Screening implements Serializable {
 
     @Id
     private String movieTitle;
@@ -18,15 +19,24 @@ public class Screening {
     @Id
     private LocalDateTime startTime;
 
-
+/*
     @OneToOne
-    @JoinColumn(name = "movieTtitle",referencedColumnName = "name",updatable = false,insertable = false)
+    @JoinColumn(name = "movieTitle",referencedColumnName = "name",updatable = false,insertable = false)
     private Movie movie;
 
     @OneToOne
     @JoinColumn(name = "room_name",referencedColumnName = "name",updatable = false,insertable = false)
     private Room room;
+*/
 
+    @Override
+    public String toString() {
+        return "Screening{" +
+                "movieTitle='" + movieTitle + '\'' +
+                ", roomName='" + roomName + '\'' +
+                ", startTime=" + startTime +
+                '}';
+    }
 
     public Screening(String movieTitle, String roomName, LocalDateTime startTime) {
         this.movieTitle = movieTitle;
@@ -56,14 +66,4 @@ public class Screening {
         return startTime;
     }
 
-    @Override
-    public String toString() {
-        return "Screening{" +
-                "movieTitle='" + movieTitle + '\'' +
-                ", roomName='" + roomName + '\'' +
-                ", startTime=" + startTime +
-                ", movie=" + movie +
-                ", room=" + room +
-                '}';
-    }
 }

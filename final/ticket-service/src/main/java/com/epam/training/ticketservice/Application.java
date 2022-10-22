@@ -67,7 +67,7 @@ public class Application {
         public void doSomethingAfterStartup() throws SQLException {
             System.out.println("ASLDKMASLKDMALSKDM");
             userRepository.save(new User("admin","admin", Set.of(Role.ADMIN)));
-            userRepository.save(new User("sanyi","asdQWE123", Set.of(Role.USER)));
+            userRepository.save(new User("s","a", Set.of(Role.USER)));
             Room room = new Room("Pedersoli",20,10);
             Movie movie = new Movie("Sátántangó","drama",135);
             roomRepository.save(room);
