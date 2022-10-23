@@ -33,20 +33,20 @@ public class BookingCommand {
         ScreeningId screeningId = new ScreeningId(movieTitle, roomName, LocalDateTime.parse(startTime,dateTimeFormatter));
 
         Screening screening = new Screening(screeningId);
-        Set<Seat> setOfSeats = parseSeats(seats,screening);
 
         BookingId bookingId = new BookingId(SecurityContext.USER.getUser().get().getName(),screeningId);
-        Booking booking = new Booking(bookingId,
-                screening);
+        Booking booking = new Booking();
+        booking.setUsername(SecurityContext.USER.getUser().get().getName());
+        Set<Seat> setOfSeats = parseSeats(seats,booking,screening);
 
-        screening.setSeats(setOfSeats);
         booking.setScreeningg(screening);
+        booking.setSeats(setOfSeats);
         screeningRepository.save(screening);
         bookingService.createBooking(booking);
     }
 
 
-    Set<Seat> parseSeats(String input, Screening screening) {
+    Set<Seat> parseSeats(String input, Booking booking,Screening screening) {
         String[] seatRowCol = input.split(" ");
         Set<Seat> seats = new HashSet<>();
         for (String position : seatRowCol) {
@@ -54,8 +54,12 @@ public class BookingCommand {
             int row = Integer.parseInt(rowAndCol[0]);
             int col = Integer.parseInt(rowAndCol[1]);
 
-            seats.add(new Seat(new SeatId(SecurityContext.USER.getUser().get().getName(),
-                    row,col,screening.getScreeningId()),screening));
+            Seat seat = new Seat();
+            seat.setSeatCol(col);
+            seat.setSeatRow(row);
+            seat.setBooking(booking);
+            seat.setScreening(screening);
+            seats.add(seat);
         }
         System.out.println("Seats: " + seats);
         return seats;

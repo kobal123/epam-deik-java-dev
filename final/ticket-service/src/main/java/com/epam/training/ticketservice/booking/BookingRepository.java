@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking,BookingId> {
-    @Query("SELECT DISTINCT b from Booking b where b.bookingId.username=:appuser_name")
+    @Query("SELECT DISTINCT b from Booking b where b.username=:appuser_name")
     List<Booking> getBookingByUsername(@Param("appuser_name") String username);
 }

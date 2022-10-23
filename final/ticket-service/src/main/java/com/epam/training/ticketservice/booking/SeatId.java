@@ -19,7 +19,7 @@ public class SeatId implements Serializable {
 
     }
 
-    public SeatId(String username, Integer seatRow, Integer seatCol, ScreeningId screeningId) {
+    public SeatId(String username, Integer seatRow, Integer seatCol) {
         this.username = username;
         this.seatRow = seatRow;
         this.seatCol = seatCol;
