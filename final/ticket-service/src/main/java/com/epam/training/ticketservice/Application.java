@@ -6,6 +6,7 @@ import com.epam.training.ticketservice.movie.MovieRepository;
 import com.epam.training.ticketservice.room.Room;
 import com.epam.training.ticketservice.room.RoomRepository;
 import com.epam.training.ticketservice.screening.Screening;
+import com.epam.training.ticketservice.screening.ScreeningId;
 import com.epam.training.ticketservice.screening.ScreeningRepository;
 import com.epam.training.ticketservice.user.Role;
 import com.epam.training.ticketservice.user.User;
@@ -72,7 +73,7 @@ public class Application {
             Movie movie = new Movie("Sátántangó","drama",135);
             roomRepository.save(room);
             movieRepository.save(movie);
-            screeningRepository.save(new Screening("Sátántangó", "Pedersoli", LocalDateTime.parse("2021-03-15 10:45",dateTimeFormatter)));
+            screeningRepository.save(new Screening(new ScreeningId("Sátántangó", "Pedersoli", LocalDateTime.parse("2021-03-15 10:45",dateTimeFormatter))));
             //org.h2.tools.Server.startWebServer(((DataSource)applicationContext.getBean("dataSource")).getConnection());
 
         }

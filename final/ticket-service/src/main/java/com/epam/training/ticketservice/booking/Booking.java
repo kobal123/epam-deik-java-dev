@@ -1,75 +1,59 @@
 package com.epam.training.ticketservice.booking;
 
-import com.epam.training.ticketservice.movie.Movie;
-import com.epam.training.ticketservice.room.Room;
-import com.epam.training.ticketservice.screening.ScreeningId;
-import com.epam.training.ticketservice.user.User;
+import com.epam.training.ticketservice.screening.Screening;
+
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
-@IdClass(BookingId.class)
 public class Booking {
 
+    @EmbeddedId
+    private BookingId bookingId;
 
-    @Id
-    private String username;
-    @Id
-    //@OneToOne(targetEntity = ScreeningId.class)
+
+    @OneToOne()
     @JoinColumns({
-            @JoinColumn(name = "screening_movie_title", referencedColumnName = "movieTitle"),
+            @JoinColumn(name = "screening_movie_title", referencedColumnName = "movie_title"),
             @JoinColumn(name = "screening_room_name", referencedColumnName = "room_name"),
-            @JoinColumn(name = "screening_start_time", referencedColumnName = "startTime")
+            @JoinColumn(name = "screening_start_time", referencedColumnName = "start_time")
     })
-    private ScreeningId screening;
+    private Screening screeningg;
 
-    @OneToMany(fetch = FetchType.EAGER,mappedBy = "booking",cascade = CascadeType.ALL)
-    private Set<Seat> seats;
+
 
     @Override
     public String toString() {
         return "Booking{" +
-                "username='" + username + '\'' +
-                ", screening=" + screening +
-                ", seats=" + seats +
+                "username='" + bookingId.getUsername() + '\'' +
+                ", screening=" + screeningg +
                 '}';
     }
 
-    public Set<Seat> getSeats() {
-        return seats;
-    }
-
-    public void setSeats(Set<Seat> seats) {
-        this.seats = seats;
-    }
-
-    public Booking(String username, ScreeningId screening) {
-        this.username = username;
-        this.screening = screening;
-    }
 
     public Booking() {
 
     }
 
-    public String getUsername() {
-        return username;
+    public Booking(BookingId bookingId, Screening screeningg) {
+        this.bookingId = bookingId;
+        this.screeningg = screeningg;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public BookingId getBookingId() {
+        return bookingId;
     }
 
-    public ScreeningId getScreeningId() {
-        return screening;
+    public void setBookingId(BookingId bookingId) {
+        this.bookingId = bookingId;
     }
 
-    public void setScreeningId(ScreeningId screening) {
-        this.screening = screening;
+    public Screening getScreeningg() {
+        return screeningg;
+    }
+
+    public void setScreeningg(Screening screening) {
+        this.screeningg = screening;
     }
 
 }

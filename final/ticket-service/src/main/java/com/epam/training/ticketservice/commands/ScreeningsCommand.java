@@ -43,6 +43,7 @@ public class ScreeningsCommand {
 
         String format = "%s (%s, %d minutes), screened in room %s, at %s";
         for (Screening screening : screenings) {
+            System.out.println(screening);
             Movie movie = movieService.getMovieByName(screening.getMovieTitle())
                     .orElseThrow(() -> new RuntimeException("movie does not exists"));
 

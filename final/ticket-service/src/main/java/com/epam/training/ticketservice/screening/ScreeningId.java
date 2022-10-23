@@ -1,19 +1,20 @@
 package com.epam.training.ticketservice.screening;
 
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Embeddable
 public class ScreeningId  implements Serializable {
 
+    @Column(name = "movie_title")
     private String movieTitle;
 
+    @Column(name = "room_name")
     private String roomName;
 
+    @Column(name = "start_time")
     private LocalDateTime startTime;
 
     public ScreeningId(String movieTitle, String roomName, LocalDateTime startTime) {
@@ -24,6 +25,12 @@ public class ScreeningId  implements Serializable {
 
     public ScreeningId() {
 
+    }
+
+    public ScreeningId(Screening screening) {
+        this.startTime = screening.getStartTime();
+        this.roomName = screening.getRoomName();
+        this.movieTitle = screening.getMovieTitle();
     }
 
     @Override

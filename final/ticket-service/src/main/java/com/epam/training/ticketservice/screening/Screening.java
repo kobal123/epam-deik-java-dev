@@ -1,69 +1,83 @@
 package com.epam.training.ticketservice.screening;
 
+import com.epam.training.ticketservice.booking.Seat;
 import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.room.Room;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
-@IdClass(ScreeningId.class)
 public class Screening implements Serializable {
 
-    @Id
-    private String movieTitle;
-    @Id
-    @Column(name = "room_name")
-    private String roomName;
-    @Id
-    private LocalDateTime startTime;
+    @EmbeddedId
+    private ScreeningId screeningId;
 
-/*
-    @OneToOne
-    @JoinColumn(name = "movieTitle",referencedColumnName = "name",updatable = false,insertable = false)
-    private Movie movie;
 
-    @OneToOne
-    @JoinColumn(name = "room_name",referencedColumnName = "name",updatable = false,insertable = false)
-    private Room room;
-*/
+    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL, mappedBy = "screening")
+    private Set<Seat> seats;
+
+    public Screening(ScreeningId screeningId) {
+        this.screeningId = screeningId;
+    }
+
+    public ScreeningId getScreeningId() {
+        return screeningId;
+    }
+
+    public void setScreeningId(ScreeningId screeningId) {
+        this.screeningId = screeningId;
+    }
 
     @Override
     public String toString() {
         return "Screening{" +
-                "movieTitle='" + movieTitle + '\'' +
-                ", roomName='" + roomName + '\'' +
-                ", startTime=" + startTime +
+                "screeningId=" + screeningId +
+                ", seats=" + seats +
                 '}';
     }
 
-    public Screening(String movieTitle, String roomName, LocalDateTime startTime) {
-        this.movieTitle = movieTitle;
-        this.roomName = roomName;
-        this.startTime = startTime;
+    public Set<Seat> getSeats() {
+        return seats;
     }
 
-    public Screening(ScreeningId screeningId) {
-        this.movieTitle = screeningId.getMovieTitle();
-        this.roomName = screeningId.getRoomName();
-        this.startTime = screeningId.getStartTime();
+    public void setSeats(Set<Seat> seats) {
+        this.seats = seats;
     }
 
     public Screening() {
 
     }
 
+    public Screening(ScreeningId screeningId, Set<Seat> seats) {
+        this.screeningId = screeningId;
+        this.seats = seats;
+    }
+
     public String getMovieTitle() {
-        return movieTitle;
+        return screeningId.getMovieTitle();
     }
 
     public String getRoomName() {
-        return roomName;
+        return screeningId.getRoomName();
     }
 
     public LocalDateTime getStartTime() {
-        return startTime;
+        return screeningId.getStartTime();
     }
 
+    public void setMovieTitle(String movieTitle) {
+        this.screeningId.setMovieTitle(movieTitle);
+    }
+
+
+    public void setRoomName(String roomName) {
+        this.screeningId.setRoomName(roomName);
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.screeningId.setStartTime(startTime);
+    }
 }
