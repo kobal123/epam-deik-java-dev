@@ -1,7 +1,7 @@
 package com.epam.training.ticketservice.security;
 
-import com.epam.training.ticketservice.user.Role;
-import com.epam.training.ticketservice.user.User;
+import com.epam.training.ticketservice.user.model.Role;
+import com.epam.training.ticketservice.user.model.User;
 
 import java.util.Optional;
 

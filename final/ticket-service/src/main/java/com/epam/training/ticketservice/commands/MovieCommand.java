@@ -3,15 +3,13 @@ package com.epam.training.ticketservice.commands;
 import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.movie.MovieService;
 import com.epam.training.ticketservice.security.SecurityContext;
-import com.epam.training.ticketservice.user.Role;
-import com.epam.training.ticketservice.user.User;
+import com.epam.training.ticketservice.user.model.Role;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 
 import java.util.List;
-import java.util.Optional;
 
 @ShellComponent
 public class MovieCommand {

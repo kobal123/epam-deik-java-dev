@@ -1,15 +1,11 @@
 package com.epam.training.ticketservice;
 
 import com.epam.training.ticketservice.booking.BookingRepository;
-import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.movie.MovieRepository;
-import com.epam.training.ticketservice.room.Room;
 import com.epam.training.ticketservice.room.RoomRepository;
-import com.epam.training.ticketservice.screening.Screening;
-import com.epam.training.ticketservice.screening.ScreeningId;
 import com.epam.training.ticketservice.screening.ScreeningRepository;
-import com.epam.training.ticketservice.user.Role;
-import com.epam.training.ticketservice.user.User;
+import com.epam.training.ticketservice.user.model.Role;
+import com.epam.training.ticketservice.user.model.User;
 import com.epam.training.ticketservice.user.UserRepository;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,9 +14,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
@@ -66,28 +60,14 @@ public class Application {
 
         @EventListener(ContextRefreshedEvent.class)
         public void doSomethingAfterStartup() throws SQLException {
-            System.out.println("ASLDKMASLKDMALSKDM");
             userRepository.save(new User("admin","admin", Set.of(Role.ADMIN)));
-            userRepository.save(new User("s","a", Set.of(Role.USER)));
-            Room room = new Room("Pedersoli",20,10);
-            Movie movie = new Movie("Sátántangó","drama",135);
-            roomRepository.save(room);
-            movieRepository.save(movie);
-            screeningRepository.save(new Screening(new ScreeningId("Sátántangó", "Pedersoli", LocalDateTime.parse("2021-03-15 10:45",dateTimeFormatter))));
-            //org.h2.tools.Server.startWebServer(((DataSource)applicationContext.getBean("dataSource")).getConnection());
+            //userRepository.save(new User("s","a", Set.of(Role.USER)));
+            //Room room = new Room("Pedersoli",20,10);
+            //Movie movie = new Movie("Sátántangó","drama",135);
+            //roomRepository.save(room);
+            //movieRepository.save(movie);
+            //screeningRepository.save(new Screening(new ScreeningId("Sátántangó", "Pedersoli", LocalDateTime.parse("2021-03-15 10:45",dateTimeFormatter))));
 
         }
     }
 }
-
-
-
-/*
-*
-* @EventListener(ContextRefreshedEvent.class)
-        public void doSomethingAfterStartup() {
-            System.out.println("Ááááááááááá");
-            userRepository.save(new User("admin","admin", Set.of(Role.ADMIN,Role.USER)));
-        }
-*
-* */

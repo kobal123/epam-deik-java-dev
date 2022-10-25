@@ -1,6 +1,10 @@
 package com.epam.training.ticketservice.user;
 
 import com.epam.training.ticketservice.security.SecurityContext;
+import com.epam.training.ticketservice.user.exception.BadCredentialsException;
+import com.epam.training.ticketservice.user.exception.UserPrivilegeException;
+import com.epam.training.ticketservice.user.model.Role;
+import com.epam.training.ticketservice.user.model.User;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

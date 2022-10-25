@@ -4,6 +4,10 @@ import com.epam.training.ticketservice.booking.Booking;
 import com.epam.training.ticketservice.booking.BookingService;
 import com.epam.training.ticketservice.security.SecurityContext;
 import com.epam.training.ticketservice.user.*;
+import com.epam.training.ticketservice.user.exception.BadCredentialsException;
+import com.epam.training.ticketservice.user.exception.UserPrivilegeException;
+import com.epam.training.ticketservice.user.model.Role;
+import com.epam.training.ticketservice.user.model.User;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
@@ -89,9 +93,9 @@ public class UserCommand {
 
     private void displayBookings(List<Booking> bookings) {
         System.out.println("Your previous bookings are");
-        System.out.println(bookings.get(0).getScreeningg());
+        System.out.println(bookings.get(0).getScreening());
         String bookingFormat = "Seats %s, %s on %s in room %s starting at %s for %i HUF";
         bookings.forEach(System.out::println);
-        bookings.stream().map(Booking::getScreeningg).forEach(System.out::println);
+        bookings.stream().map(Booking::getScreening).forEach(System.out::println);
     }
 }

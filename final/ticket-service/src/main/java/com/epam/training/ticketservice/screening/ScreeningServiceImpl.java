@@ -3,8 +3,10 @@ package com.epam.training.ticketservice.screening;
 import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.movie.MovieRepository;
 import com.epam.training.ticketservice.room.RoomRepository;
+import com.epam.training.ticketservice.screening.exception.OverlappingScreeningBreakTimeException;
+import com.epam.training.ticketservice.screening.exception.OverlappingScreeningException;
+import com.epam.training.ticketservice.screening.exception.ScreeningNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -41,6 +43,17 @@ public class ScreeningServiceImpl implements ScreeningService {
         validateScreening(screeningToSave);
         screeningRepository.save(screeningToSave);
     }
+
+    public void updateScreening(Screening screening) {
+        Optional<Screening> screeningOptional = screeningRepository.findById(screening.getScreeningId());
+        if (screeningOptional.isEmpty()) {
+            throw new RuntimeException("Screening does not exists");
+        }
+
+        validateScreening(screening);
+        screeningRepository.save(screening);
+    }
+
 
     private void validateScreening(Screening screeningToSave) {
         List<Screening> screenings = screeningRepository.findAll();
@@ -94,6 +107,11 @@ public class ScreeningServiceImpl implements ScreeningService {
     public void deleteScreening(String movieName,String room, String startTime) {
         ScreeningId screeningId = new ScreeningId(movieName,room, LocalDateTime.parse(startTime,formatter));
         screeningRepository.deleteById(screeningId);
+    }
+
+    @Override
+    public Optional<Screening> getScreeningById(ScreeningId screeningId) {
+        return screeningRepository.findById(screeningId);
     }
 
     @Override

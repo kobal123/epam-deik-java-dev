@@ -6,6 +6,9 @@ import com.epam.training.ticketservice.screening.ScreeningId;
 import com.epam.training.ticketservice.screening.ScreeningRepository;
 import com.epam.training.ticketservice.screening.ScreeningService;
 import com.epam.training.ticketservice.security.SecurityContext;
+import org.hibernate.TransientPropertyValueException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
@@ -30,23 +33,25 @@ public class BookingCommand {
 
     @ShellMethod(key = "book")
     void book(String movieTitle, String roomName, String startTime, String seats) {
-        ScreeningId screeningId = new ScreeningId(movieTitle, roomName, LocalDateTime.parse(startTime,dateTimeFormatter));
 
-        Screening screening = new Screening(screeningId);
+        Screening screening = new Screening();
+        screening.setMovieTitle(movieTitle);
+        screening.setRoomName(roomName);
+        screening.setStartTime(LocalDateTime.parse(startTime,dateTimeFormatter));
 
-        BookingId bookingId = new BookingId(SecurityContext.USER.getUser().get().getName(),screeningId);
         Booking booking = new Booking();
         booking.setUsername(SecurityContext.USER.getUser().get().getName());
-        Set<Seat> setOfSeats = parseSeats(seats,booking,screening);
 
-        booking.setScreeningg(screening);
+        Set<Seat> setOfSeats = parseSeats(seats, screening);
+
+        booking.setScreening(screening);
         booking.setSeats(setOfSeats);
-        screeningRepository.save(screening);
+
         bookingService.createBooking(booking);
     }
 
 
-    Set<Seat> parseSeats(String input, Booking booking,Screening screening) {
+    Set<Seat> parseSeats(String input, Screening screening) {
         String[] seatRowCol = input.split(" ");
         Set<Seat> seats = new HashSet<>();
         for (String position : seatRowCol) {
@@ -57,11 +62,9 @@ public class BookingCommand {
             Seat seat = new Seat();
             seat.setSeatCol(col);
             seat.setSeatRow(row);
-            seat.setBooking(booking);
             seat.setScreening(screening);
             seats.add(seat);
         }
-        System.out.println("Seats: " + seats);
         return seats;
     }
 }

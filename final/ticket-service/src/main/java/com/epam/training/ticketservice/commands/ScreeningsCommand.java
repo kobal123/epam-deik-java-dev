@@ -2,12 +2,12 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.movie.MovieService;
-import com.epam.training.ticketservice.screening.OverlappingScreeningBreakTimeException;
-import com.epam.training.ticketservice.screening.OverlappingScreeningException;
+import com.epam.training.ticketservice.screening.exception.OverlappingScreeningBreakTimeException;
+import com.epam.training.ticketservice.screening.exception.OverlappingScreeningException;
 import com.epam.training.ticketservice.screening.Screening;
 import com.epam.training.ticketservice.screening.ScreeningService;
 import com.epam.training.ticketservice.security.SecurityContext;
-import com.epam.training.ticketservice.user.Role;
+import com.epam.training.ticketservice.user.model.Role;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -43,7 +43,6 @@ public class ScreeningsCommand {
 
         String format = "%s (%s, %d minutes), screened in room %s, at %s";
         for (Screening screening : screenings) {
-            System.out.println(screening);
             Movie movie = movieService.getMovieByName(screening.getMovieTitle())
                     .orElseThrow(() -> new RuntimeException("movie does not exists"));
 

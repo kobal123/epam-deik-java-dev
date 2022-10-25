@@ -1,8 +1,8 @@
-package com.epam.training.ticketservice.user;
+package com.epam.training.ticketservice.user.exception;
 
 public class BadCredentialsException extends RuntimeException {
 
-    BadCredentialsException(String message) {
+    public BadCredentialsException(String message) {
         super(message);
     }
 

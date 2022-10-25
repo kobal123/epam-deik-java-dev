@@ -1,14 +1,34 @@
 package com.epam.training.ticketservice.booking;
 
 import com.epam.training.ticketservice.screening.Screening;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 
-
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
 //@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"username","screening_movie_title","screening_room_name","screening_start_time"})})
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Booking {
 
     @Id
@@ -17,59 +37,36 @@ public class Booking {
 
     private String username;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumns({
-            @JoinColumn(name = "screening_movie_title", referencedColumnName = "movie_title"),
-            @JoinColumn(name = "screening_room_name", referencedColumnName = "room_name"),
-            @JoinColumn(name = "screening_start_time", referencedColumnName = "start_time")
+            @JoinColumn(name = "screening_movie_title", referencedColumnName = "movie_title", nullable = false),
+            @JoinColumn(name = "screening_room_name", referencedColumnName = "room_name",  nullable = false),
+            @JoinColumn(name = "screening_start_time", referencedColumnName = "start_time",  nullable = false)
     })
-    private Screening screeningg;
-
-    public Booking() {
-
-    }
-
-    public Booking(Long id, String username, Screening screeningg, Set<Seat> seats) {
-        this.id = id;
-        this.username = username;
-        this.screeningg = screeningg;
-        this.seats = seats;
-    }
+    private Screening screening;
 
     @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     @JoinColumn(name = "seat_id", referencedColumnName = "id")
     private Set<Seat> seats;
 
-    public Set<Seat> getSeats() {
-        return seats;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Booking booking = (Booking) o;
+        return Objects.equals(id, booking.id)
+                && Objects.equals(username, booking.username)
+                && Objects.equals(screening, booking.screening)
+                && Objects.equals(seats, booking.seats);
     }
 
-    public void setSeats(Set<Seat> seats) {
-        this.seats = seats;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public Screening getScreeningg() {
-        return screeningg;
-    }
-
-    public void setScreeningg(Screening screeningg) {
-        this.screeningg = screeningg;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, screening, seats);
     }
 
     @Override
@@ -77,7 +74,7 @@ public class Booking {
         return "Booking{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", screeningg=" + screeningg +
+                ", screening=" + screening.getScreeningId() +
                 ", seats=" + seats +
                 '}';
     }
