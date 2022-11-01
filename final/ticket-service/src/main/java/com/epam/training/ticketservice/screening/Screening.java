@@ -35,6 +35,7 @@ public class Screening implements Serializable {
         this.screeningId = screeningId;
     }
 
+
     public ScreeningId getScreeningId() {
         return screeningId;
     }

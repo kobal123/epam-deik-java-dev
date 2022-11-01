@@ -1,5 +1,6 @@
 package com.epam.training.ticketservice.movie;
 
+import com.epam.training.ticketservice.movie.exception.MovieNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,17 +18,24 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public void updateMovie(Movie movie) {
+        Optional<Movie> optionalMovie = movieRepository.findById(movie.getName());
+        if (optionalMovie.isEmpty()) {
+            throw new MovieNotFoundException(
+                    String.format("Updating movie %s failed, movie does not exists",movie.getName())
+            );
+        }
         movieRepository.save(movie);
     }
 
     @Override
     public void deleteMovieByName(String name) {
-        Optional<Movie> movie = movieRepository.findById(name);
-        if (movie.isEmpty()) {
-            throw new RuntimeException("Movie does not exist" + movie);
+        Optional<Movie> optionalMovie = movieRepository.findById(name);
+        if (optionalMovie.isEmpty()) {
+            throw new MovieNotFoundException(
+                    String.format("Deleting movie %s failed, movie does not exists",name)
+            );
         }
-        movieRepository.deleteById(name);
-    }
+        movieRepository.save(optionalMovie.get());    }
 
     @Override
     public void createMovie(Movie movie) {
@@ -43,4 +51,5 @@ public class MovieServiceImpl implements MovieService {
     public List<Movie> getAllMovies() {
         return movieRepository.findAll();
     }
+
 }

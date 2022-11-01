@@ -24,4 +24,6 @@ public class ScreeningId  implements Serializable {
 
     @Column(name = "start_time")
     private LocalDateTime startTime;
+
+
 }

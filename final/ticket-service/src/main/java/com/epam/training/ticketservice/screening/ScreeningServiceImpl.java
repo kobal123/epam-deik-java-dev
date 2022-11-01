@@ -17,31 +17,28 @@ public class ScreeningServiceImpl implements ScreeningService {
     private static final int BREAK_TIME = 10;
     private final DateTimeFormatter formatter;
     private final ScreeningRepository screeningRepository;
-    private final RoomRepository roomRepository;
     private final MovieRepository movieRepository;
 
 
     public ScreeningServiceImpl(DateTimeFormatter formatter,
                                 ScreeningRepository screeningRepository,
-                                RoomRepository roomRepository,
                                 MovieRepository movieRepository) {
         this.formatter = formatter;
         this.screeningRepository = screeningRepository;
-        this.roomRepository = roomRepository;
         this.movieRepository = movieRepository;
     }
 
+
+
     @Override
-    public void createScreening(String movieName,String room, String startTime) {
-        ScreeningId screeningId = new ScreeningId(movieName,room, LocalDateTime.parse(startTime,formatter));
-        Optional<Screening> screeningOptional = screeningRepository.findById(screeningId);
+    public void createScreening(Screening screening) {
+        Optional<Screening> screeningOptional = screeningRepository.findById(screening.getScreeningId());
         if (screeningOptional.isPresent()) {
             throw new RuntimeException("Screening already exists");
         }
+        validateScreening(screening);
+        screeningRepository.save(screening);
 
-        Screening screeningToSave = new Screening(screeningId);
-        validateScreening(screeningToSave);
-        screeningRepository.save(screeningToSave);
     }
 
     public void updateScreening(Screening screening) {
@@ -58,6 +55,7 @@ public class ScreeningServiceImpl implements ScreeningService {
     private void validateScreening(Screening screeningToSave) {
         List<Screening> screenings = screeningRepository.findAll();
         for (Screening screening : screenings) {
+
             if (screening.getRoomName().equals(screeningToSave.getRoomName())) {
                 checkScreeningDateCollision(screening,screeningToSave);
             }
@@ -83,7 +81,7 @@ public class ScreeningServiceImpl implements ScreeningService {
                 && secondStart.isBefore(firstEnd.plusMinutes(BREAK_TIME));
 
 
-        if (isSecondStartBetweenScreeningPeriod && isSecondEndBetweenScreeningPeriod) {
+        if (isSecondStartBetweenScreeningPeriod || isSecondEndBetweenScreeningPeriod) {
             throw new OverlappingScreeningException();
         } else if (isSecondStartInBreakTime) {
             throw new OverlappingScreeningBreakTimeException();
@@ -92,21 +90,16 @@ public class ScreeningServiceImpl implements ScreeningService {
     }
 
 
-    @Override
-    public void updateScreening(String movieName,String room, String startTime) {
-        ScreeningId screeningId = new ScreeningId(movieName,room, LocalDateTime.parse(startTime,formatter));
-        Optional<Screening> screeningOptional = screeningRepository.findById(screeningId);
-        if (screeningOptional.isEmpty()) {
-            throw new RuntimeException("Screening does not exists");
-        }
 
-        screeningRepository.save(screeningOptional.get());
-    }
 
     @Override
     public void deleteScreening(String movieName,String room, String startTime) {
         ScreeningId screeningId = new ScreeningId(movieName,room, LocalDateTime.parse(startTime,formatter));
-        screeningRepository.deleteById(screeningId);
+        Optional<Screening> screeningOptional = screeningRepository.findById(screeningId);
+        if (screeningOptional.isEmpty()) {
+            throw new ScreeningNotFoundException("Failed to delete screening, screening does not exists");
+        }
+        screeningRepository.save(screeningOptional.get());
     }
 
     @Override

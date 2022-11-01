@@ -2,7 +2,7 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.movie.MovieService;
-import com.epam.training.ticketservice.security.SecurityContext;
+import com.epam.training.ticketservice.security.UserContext;
 import com.epam.training.ticketservice.user.model.Role;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
@@ -57,7 +57,7 @@ public class MovieCommand {
 
     @ShellMethodAvailability({"deleteMovie","updateMovie","createMovie"})
     public Availability isAdmin() {
-        return SecurityContext.USER.currentUserHasRole(Role.ADMIN)
+        return UserContext.userHasRole(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }

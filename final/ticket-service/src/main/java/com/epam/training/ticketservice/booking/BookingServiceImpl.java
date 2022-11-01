@@ -39,8 +39,10 @@ public class BookingServiceImpl implements BookingService{
         } else{
             Screening screening = screeningOptional.get();
             screening.addBooking(booking);
-            //bookingRepository.save(booking);
+
             screeningService.updateScreening(screening);
         }
     }
+
+
 }

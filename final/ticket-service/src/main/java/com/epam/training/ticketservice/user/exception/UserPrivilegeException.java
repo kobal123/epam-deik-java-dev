@@ -5,7 +5,4 @@ public class UserPrivilegeException extends RuntimeException {
         super(message);
     }
 
-    public UserPrivilegeException() {
-
-    }
 }

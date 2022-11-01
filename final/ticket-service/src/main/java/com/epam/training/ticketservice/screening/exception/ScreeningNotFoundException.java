@@ -5,7 +5,4 @@ public class ScreeningNotFoundException extends RuntimeException{
         super(message);
     }
 
-    public ScreeningNotFoundException() {
-
-    }
 }

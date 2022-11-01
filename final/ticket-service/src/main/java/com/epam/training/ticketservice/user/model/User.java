@@ -23,8 +23,12 @@ public class User implements Serializable {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "Role", joinColumns = @JoinColumn(name = "id"))
     @Enumerated(EnumType.STRING)
-    private Set<Role> role;
+    private Set<Role> roles;
 
+
+    public boolean hasRole(Role role) {
+        return roles.contains(role);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -37,11 +41,11 @@ public class User implements Serializable {
         User user = (User) o;
         return Objects.equals(name, user.name)
                 && Objects.equals(password, user.password)
-                && Objects.equals(role, user.role);
+                && Objects.equals(roles, user.roles);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, password, role);
+        return Objects.hash(name, password, roles);
     }
 }

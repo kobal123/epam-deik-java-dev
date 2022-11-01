@@ -2,8 +2,8 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.booking.Booking;
 import com.epam.training.ticketservice.booking.BookingService;
-import com.epam.training.ticketservice.security.SecurityContext;
-import com.epam.training.ticketservice.user.*;
+import com.epam.training.ticketservice.security.UserContext;
+import com.epam.training.ticketservice.user.UserServiceImpl;
 import com.epam.training.ticketservice.user.exception.BadCredentialsException;
 import com.epam.training.ticketservice.user.exception.UserPrivilegeException;
 import com.epam.training.ticketservice.user.model.Role;
@@ -15,18 +15,18 @@ import java.util.List;
 
 @ShellComponent
 public class UserCommand {
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
     private final String loginFailedMessage = "Login failed due to incorrect credentials";
     private final BookingService bookingService;
-    public UserCommand(UserService userService, BookingService bookingService) {
-        this.userService = userService;
+    public UserCommand(UserServiceImpl userServiceImpl, BookingService bookingService) {
+        this.userServiceImpl = userServiceImpl;
         this.bookingService = bookingService;
     }
 
     @ShellMethod(value = "Sign in as a privileged user", key = "sign in privileged")
     public void signInPrivileged(String username,String password) {
         try {
-            userService.signInPrivilegedUser(username,password);
+            userServiceImpl.signInPrivilegedUser(username,password);
         } catch (BadCredentialsException badCredentialsException) {
             System.out.println(loginFailedMessage);
         } catch (UserPrivilegeException userPrivilegeException) {
@@ -38,14 +38,14 @@ public class UserCommand {
 
     @ShellMethod(value = "Sign out from current account", key = "sign out")
     public void signOut() {
-        userService.signOutUser();
+        userServiceImpl.signOutUser();
     }
 
 
     @ShellMethod(value = "Sign in as a basic user", key = "sign in")
     public void signIn(String username,String password) {
         try {
-            userService.signInBasicUser(username,password);
+            userServiceImpl.signInBasicUser(username,password);
         } catch (BadCredentialsException badCredentialsException) {
             System.out.println(loginFailedMessage);
         } catch (UserPrivilegeException userPrivilegeException) {
@@ -57,7 +57,7 @@ public class UserCommand {
     @ShellMethod(value = "Register a new user", key = "sign up")
     public void signUp(String username, String password) {
         try {
-            userService.registerUser(username, password);
+            userServiceImpl.registerUser(username, password);
             System.out.println("Created user " + username);
         } catch (BadCredentialsException exception) {
             System.out.println("Login failed due to incorrect credentials");
@@ -66,15 +66,14 @@ public class UserCommand {
 
 
     @ShellMethod(value = "Gives information about the currently logged in account", key = "describe account")
-    public void
-    describeAccount() {
-        if (SecurityContext.USER.isUserLoggedIn()) {
-            User user = SecurityContext.USER.getUser().get();
+    public void describeAccount() {
+        if (UserContext.isUserLoggedIn()) {
+            User user = UserContext.getUser().get();
 
-            if (SecurityContext.USER.currentUserHasRole(Role.ADMIN)) {
+            if (user.hasRole(Role.ADMIN)) {
                 System.out.println(String.format("Signed in with privileged account '%s'",
                         user.getName()));
-            } else if (SecurityContext.USER.currentUserHasRole(Role.USER)) {
+            } else if (user.hasRole(Role.USER)) {
                 System.out.println(String.format("Signed in with account '%s'",
                         user.getName()));
 

@@ -5,9 +5,9 @@ import java.util.Optional;
 
 public interface ScreeningService {
 
-    void createScreening(String movieName,String room, String startTime);
 
-    void updateScreening(String movieName,String room, String startTime);
+    void createScreening(Screening screening);
+
 
     void deleteScreening(String movieName,String room, String startTime);
 

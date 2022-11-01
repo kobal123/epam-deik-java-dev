@@ -2,9 +2,8 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.room.Room;
 import com.epam.training.ticketservice.room.RoomService;
-import com.epam.training.ticketservice.security.SecurityContext;
+import com.epam.training.ticketservice.security.UserContext;
 import com.epam.training.ticketservice.user.model.Role;
-import com.epam.training.ticketservice.user.UserService;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -58,8 +57,8 @@ public class RoomCommand {
 
 
     public Availability isAdmin() {
-        System.out.println("hello");
-        return SecurityContext.USER.currentUserHasRole(Role.ADMIN)
+
+        return UserContext.userHasRole(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }
