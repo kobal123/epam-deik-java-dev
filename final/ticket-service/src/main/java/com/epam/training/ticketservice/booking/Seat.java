@@ -46,7 +46,6 @@ public class Seat implements Serializable {
             @JoinColumn(name = "screening_room_name", referencedColumnName = "room_name"),
             @JoinColumn(name = "screening_start_time", referencedColumnName = "start_time")
     })
-
     private Screening screening;
 
 
@@ -56,7 +55,6 @@ public class Seat implements Serializable {
                 "id=" + id +
                 ", seatRow=" + seatRow +
                 ", seatCol=" + seatCol +
-                ", screening=" + screening.getScreeningId() +
                 '}';
     }
 }

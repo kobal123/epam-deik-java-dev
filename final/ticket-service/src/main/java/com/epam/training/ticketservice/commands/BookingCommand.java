@@ -57,6 +57,7 @@ public class BookingCommand {
             Seat seat = new Seat();
             seat.setSeatCol(col);
             seat.setSeatRow(row);
+            seat.setScreening(screening);
             seats.add(seat);
         }
         return seats;

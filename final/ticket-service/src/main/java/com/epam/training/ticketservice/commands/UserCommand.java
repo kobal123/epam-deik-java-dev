@@ -2,6 +2,7 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.booking.Booking;
 import com.epam.training.ticketservice.booking.BookingService;
+import com.epam.training.ticketservice.booking.SeatRepository;
 import com.epam.training.ticketservice.security.UserContext;
 import com.epam.training.ticketservice.user.UserServiceImpl;
 import com.epam.training.ticketservice.user.exception.BadCredentialsException;
@@ -18,9 +19,11 @@ public class UserCommand {
     private final UserServiceImpl userServiceImpl;
     private final String loginFailedMessage = "Login failed due to incorrect credentials";
     private final BookingService bookingService;
-    public UserCommand(UserServiceImpl userServiceImpl, BookingService bookingService) {
+    private final SeatRepository seatRepository;
+    public UserCommand(UserServiceImpl userServiceImpl, BookingService bookingService, SeatRepository seatRepository) {
         this.userServiceImpl = userServiceImpl;
         this.bookingService = bookingService;
+        this.seatRepository = seatRepository;
     }
 
     @ShellMethod(value = "Sign in as a privileged user", key = "sign in privileged")
@@ -91,10 +94,10 @@ public class UserCommand {
     }
 
     private void displayBookings(List<Booking> bookings) {
-        System.out.println("Your previous bookings are");
-        System.out.println(bookings.get(0).getScreening());
+        //System.out.println("Your previous bookings are");
+        //System.out.println(bookings.get(0).getScreening());
         String bookingFormat = "Seats %s, %s on %s in room %s starting at %s for %i HUF";
-        bookings.forEach(System.out::println);
-        bookings.stream().map(Booking::getScreening).forEach(System.out::println);
+        //bookings.stream().map(Booking::getScreening).forEach(System.out::println);
+        System.out.println(seatRepository.findAll());
     }
 }
