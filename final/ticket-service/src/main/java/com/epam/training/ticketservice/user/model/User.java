@@ -1,22 +1,31 @@
 package com.epam.training.ticketservice.user.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Objects;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Table;
 import java.util.Set;
 
 @Entity
 @Table(name = "appuser")
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
-@Getter
-public class User implements Serializable {
+public class User {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(unique = true)
     private String name;
     private String password;
 
@@ -25,27 +34,14 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
 
+    public User(String name, String password, Set<Role> roles) {
+        this.name = name;
+        this.password = password;
+        this.roles = roles;
+    }
 
     public boolean hasRole(Role role) {
         return roles.contains(role);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        User user = (User) o;
-        return Objects.equals(name, user.name)
-                && Objects.equals(password, user.password)
-                && Objects.equals(roles, user.roles);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, password, roles);
-    }
 }

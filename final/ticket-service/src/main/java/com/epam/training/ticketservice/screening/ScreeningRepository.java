@@ -1,9 +1,16 @@
 package com.epam.training.ticketservice.screening;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface ScreeningRepository extends JpaRepository<Screening,ScreeningId> {
+import java.time.LocalDateTime;
+import java.util.Optional;
 
+@Repository
+public interface ScreeningRepository extends JpaRepository<Screening,Long> {
+
+    @Query("SELECT s FROM Screening s WHERE s.roomName=:roomName and s.movieTitle=:movieName and s.startTime=:startTime")
+    Optional<Screening> getScreeningByMovieAndRoomAndStartTime(@Param("movieName") String movie, @Param("roomName") String room, @Param("startTime") LocalDateTime start);
 }

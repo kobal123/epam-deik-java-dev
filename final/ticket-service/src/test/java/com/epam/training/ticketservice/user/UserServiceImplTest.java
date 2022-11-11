@@ -1,94 +1,112 @@
 package com.epam.training.ticketservice.user;
 
-import com.epam.training.ticketservice.screening.ScreeningServiceImpl;
-import com.epam.training.ticketservice.user.exception.BadCredentialsException;
-import com.epam.training.ticketservice.user.exception.UserPrivilegeException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.epam.training.ticketservice.user.model.Role;
 import com.epam.training.ticketservice.user.model.User;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
-@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    @Mock
-    private UserRepository userRepository;
-
-    @InjectMocks
-    private UserServiceImpl underTest;// = new ScreeningServiceImpl(formatter, screeningRepository,movieRepository );
-
+    private final UserRepository userRepository = mock(UserRepository.class);
+    private final UserService underTest = new UserServiceImpl(userRepository);
 
     @Test
-    void testSignInPrivilegedUserShouldThrowBadCredentialsExceptionOnWrongCredentials() {
+    void testLoginShouldSetLoggedInUserWhenUsernameAndPasswordAreCorrect() {
+        // Given
+        User user = new User("user", "password", Set.of(Role.USER));
+        Optional<User> expected = Optional.of(user);
+        when(userRepository.findByNameAndPassword("user", "pass")).thenReturn(Optional.of(user));
 
-        // given
-        String username = "username";
-        String password = "password";
-        String wrongPassword = "password1";
-        User user = new User(username, password, Set.of(Role.ADMIN) );
-        Mockito.when(userRepository.findById(username)).thenReturn(Optional.of(user));
+        // When
+        Optional<UserDTO> actual = underTest.login("user", "pass");
 
-        // when
-        // then
-        assertThrows(BadCredentialsException.class,
-                () -> underTest.signInPrivilegedUser(username,wrongPassword));
+        // Then
+        assertEquals(expected.get().getName(), actual.get().getName());
+        assertEquals(expected.get().getRoles(), actual.get().getRoles());
+        verify(userRepository).findByNameAndPassword("user", "pass");
     }
 
     @Test
-    void testSignInBasicUserShouldThrowBadCredentialsExceptionOnWrongCredentials() {
-        // given
-        String username = "username";
-        String password = "password";
-        String wrongPassword = "password1";
-        User user = new User(username, password, Set.of(Role.USER) );
-        Mockito.when(userRepository.findById(username)).thenReturn(Optional.of(user));
+    void testLoginShouldReturnOptionalEmptyWhenUsernameOrPasswordAreNotCorrect() {
+        // Given
+        Optional<UserDTO> expected = Optional.empty();
+        when(userRepository.findByNameAndPassword("dummy", "dummy")).thenReturn(Optional.empty());
 
-        // when
-        // then
-        assertThrows(BadCredentialsException.class,
-                () -> underTest.signInBasicUser(username,wrongPassword));
+        // When
+        Optional<UserDTO> actual = underTest.login("dummy", "dummy");
+
+        // Then
+        assertEquals(expected, actual);
+        verify(userRepository).findByNameAndPassword("dummy", "dummy");
     }
 
     @Test
-    void testSignInBasicUserWithAdminAccountShouldThrowUserPrivilegeException() {
-        // given
-        String username = "username";
-        String password = "password";
-        User user = new User(username, password, Set.of(Role.ADMIN) );
-        Mockito.when(userRepository.findById(username)).thenReturn(Optional.of(user));
+    void testLogoutShouldReturnOptionalEmptyWhenThereIsNoOneLoggedIn() {
+        // Given
+        Optional<UserDTO> expected = Optional.empty();
 
-        // when
-        // then
-        assertThrows(UserPrivilegeException.class,
-                () -> underTest.signInBasicUser(username,password));
+        // When
+        Optional<UserDTO> actual = underTest.logout();
 
+        // Then
+        assertEquals(expected, actual);
     }
 
     @Test
-    void testSignInPrivilegedWithBasicAccountShouldThrowUserPrivilegeException() {
-        // given
-        String username = "username";
-        String password = "password";
-        User user = new User(username, password, Set.of(Role.USER) );
-        Mockito.when(userRepository.findById(username)).thenReturn(Optional.of(user));
+    void testLogoutShouldReturnThePreviouslyLoggedInUserWhenThereIsALoggedInUser() {
+        // Given
+        User user = new User("user", "password", Set.of(Role.USER));
+        when(userRepository.findByNameAndPassword("user", "pass")).thenReturn(Optional.of(user));
+        Optional<UserDTO> expected = underTest.login("user", "password");
 
-        // when
-        // then
-        assertThrows(UserPrivilegeException.class,
-                () -> underTest.signInPrivilegedUser(username,password));
+        // When
+        Optional<UserDTO> actual = underTest.logout();
 
+        // Then
+        assertEquals(expected, actual);
     }
 
     @Test
-    void registerUser() {
+    void testDescribeShouldReturnTheLoggedInUserWhenThereIsALoggedInUser() {
+        // Given
+        User user = new User("user", "password", Set.of(Role.USER));
+        when(userRepository.findByNameAndPassword("user", "pass")).thenReturn(Optional.of(user));
+        Optional<UserDTO> expected = underTest.login("user", "password");
+
+        // When
+        Optional<UserDTO> actual = underTest.describe();
+
+        // Then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testDescribeShouldReturnOptionalEmptyWhenThereIsNoOneLoggedIn() {
+        // Given
+        Optional<UserDTO> expected = Optional.empty();
+
+        // When
+        Optional<UserDTO> actual = underTest.describe();
+
+        // Then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testRegisterUserShouldCallUserRepositoryWhenTheInputIsValid() {
+        // Given
+        // When
+        underTest.register("user", "pass");
+
+        // Then
+        verify(userRepository).save(new User("user", "pass", Set.of(Role.USER)));
     }
 }

@@ -25,7 +25,7 @@ public class Application {
     public static void main(String[] args) {
         System.out.println("Hello world");
         SpringApplication app = new SpringApplication(Application.class);
-        app.setWebApplicationType(WebApplicationType.NONE);
+        //app.setWebApplicationType(WebApplicationType.NONE);
         app.setBannerMode(Banner.Mode.OFF);
 
         app.run(args);

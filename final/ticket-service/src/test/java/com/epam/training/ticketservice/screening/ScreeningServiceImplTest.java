@@ -45,17 +45,16 @@ class ScreeningServiceImplTest {
         LocalDateTime existingScreeningStartTime = LocalDateTime.parse("2002-04-11 16:10", formatter);
         LocalDateTime screeningToSaveStartTime = LocalDateTime.parse("2002-04-11 16:15", formatter);
 
-        Screening existingScreening = new Screening(new ScreeningId("Movie",
+        Screening existingScreening = new Screening("Movie",
                 "Room",
-                existingScreeningStartTime));
+                existingScreeningStartTime);
 
-        Screening screeningToSave = new Screening(new ScreeningId("Movie2",
+        Screening screeningToSave = new Screening("Movie2",
                 "Room",
-                screeningToSaveStartTime));
+                screeningToSaveStartTime);
         Movie movieOne = new Movie("Movie", "drama", 135);
         Movie movieTwo = new Movie("Movie2", "action", 200);
         List<Screening> screenings = List.of(existingScreening);
-        when(screeningRepository.findById(screeningToSave.getScreeningId())).thenReturn(Optional.empty());
         when(screeningRepository.findAll()).thenReturn(screenings);
         when(movieRepository.findById(existingScreening.getMovieTitle())).thenReturn(Optional.of(movieOne));
         when(movieRepository.findById(screeningToSave.getMovieTitle())).thenReturn(Optional.of(movieTwo));
@@ -73,17 +72,16 @@ class ScreeningServiceImplTest {
         LocalDateTime existingScreeningStartTime = LocalDateTime.parse("2002-04-11 14:00", formatter);
         LocalDateTime screeningToSaveStartTime = LocalDateTime.parse("2002-04-11 16:05", formatter);
 
-        Screening existingScreening = new Screening(new ScreeningId("Movie",
+        Screening existingScreening = new Screening("Movie",
                 "Room",
-                existingScreeningStartTime));
+                existingScreeningStartTime);
 
-        Screening screeningToSave = new Screening(new ScreeningId("Movie2",
+        Screening screeningToSave = new Screening("Movie2",
                 "Room",
-                screeningToSaveStartTime));
+                screeningToSaveStartTime);
         Movie movieOne = new Movie("Movie", "drama", 120);
         Movie movieTwo = new Movie("Movie2", "action", 200);
         List<Screening> screenings = List.of(existingScreening);
-        when(screeningRepository.findById(screeningToSave.getScreeningId())).thenReturn(Optional.empty());
         when(screeningRepository.findAll()).thenReturn(screenings);
         when(movieRepository.findById(existingScreening.getMovieTitle())).thenReturn(Optional.of(movieOne));
         when(movieRepository.findById(screeningToSave.getMovieTitle())).thenReturn(Optional.of(movieTwo));
@@ -97,18 +95,16 @@ class ScreeningServiceImplTest {
     @Test
     void testDateValidationShouldPassWhenScreeningStartsInBreakTimeInDifferentRoom() {
         // Given
-        Screening existingScreening = new Screening(new ScreeningId("Movie",
+        Screening existingScreening = new Screening("Movie",
                 "Room",
-                existingScreeningStartTime));
+                existingScreeningStartTime);
 
-        Screening screeningToSave = new Screening(new ScreeningId("Movie2",
+        Screening screeningToSave = new Screening("Movie2",
                 "Room2",
-                screeningToSaveStartTime));
+                screeningToSaveStartTime);
         Movie movieOne = new Movie("Movie", "drama", 120);
         Movie movieTwo = new Movie("Movie2", "action", 200);
         List<Screening> screenings = List.of(existingScreening);
-        when(screeningRepository.findById(screeningToSave.getScreeningId())).thenReturn(Optional.empty());
-        when(screeningRepository.findAll()).thenReturn(screenings);
         //when(movieRepository.findById(existingScreening.getMovieTitle())).thenReturn(Optional.of(movieOne));
         //when(movieRepository.findById(screeningToSave.getMovieTitle())).thenReturn(Optional.of(movieTwo));
         when(screeningRepository.save(screeningToSave)).thenReturn(screeningToSave);

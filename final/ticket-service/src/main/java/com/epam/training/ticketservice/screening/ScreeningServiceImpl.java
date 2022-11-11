@@ -32,7 +32,10 @@ public class ScreeningServiceImpl implements ScreeningService {
 
     @Override
     public void createScreening(Screening screening) {
-        Optional<Screening> screeningOptional = screeningRepository.findById(screening.getScreeningId());
+        Optional<Screening> screeningOptional = screeningRepository.getScreeningByMovieAndRoomAndStartTime(
+                screening.getMovieTitle(),
+                screening.getRoomName(),
+                screening.getStartTime());
         if (screeningOptional.isPresent()) {
             throw new RuntimeException("Screening already exists");
         }
@@ -42,13 +45,18 @@ public class ScreeningServiceImpl implements ScreeningService {
     }
 
     public void updateScreening(Screening screening) {
-        Optional<Screening> screeningOptional = screeningRepository.findById(screening.getScreeningId());
+        Optional<Screening> screeningOptional = screeningRepository.findById(screening.getId());
         if (screeningOptional.isEmpty()) {
             throw new RuntimeException("Screening does not exists");
         }
 
         validateScreening(screening);
         screeningRepository.save(screening);
+    }
+
+    @Override
+    public Optional<Screening> getScreeningByMovieAndRoomAndStartTime(String movie, String room, LocalDateTime start) {
+        return screeningRepository.getScreeningByMovieAndRoomAndStartTime(movie, room, start);
     }
 
 
@@ -94,8 +102,12 @@ public class ScreeningServiceImpl implements ScreeningService {
 
     @Override
     public void deleteScreening(String movieName,String room, String startTime) {
-        ScreeningId screeningId = new ScreeningId(movieName,room, LocalDateTime.parse(startTime,formatter));
-        Optional<Screening> screeningOptional = screeningRepository.findById(screeningId);
+        //Screening screening = new ScreeningId(movieName,room, LocalDateTime.parse(startTime,formatter));
+        Optional<Screening> screeningOptional = screeningRepository.
+                getScreeningByMovieAndRoomAndStartTime(movieName,
+                        room,
+                        LocalDateTime.parse(startTime,formatter));
+
         if (screeningOptional.isEmpty()) {
             throw new ScreeningNotFoundException("Failed to delete screening, screening does not exists");
         }
@@ -103,7 +115,7 @@ public class ScreeningServiceImpl implements ScreeningService {
     }
 
     @Override
-    public Optional<Screening> getScreeningById(ScreeningId screeningId) {
+    public Optional<Screening> getScreeningById(Long screeningId) {
         return screeningRepository.findById(screeningId);
     }
 

@@ -7,5 +7,5 @@ public interface BookingService {
     List<Booking> getBookingsByUsername(String username);
 
     void createBooking(Booking booking);
-
+    List<Booking> getAllBookings();
 }

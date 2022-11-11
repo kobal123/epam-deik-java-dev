@@ -1,71 +1,74 @@
 package com.epam.training.ticketservice.user;
 
-import com.epam.training.ticketservice.security.UserContext;
-import com.epam.training.ticketservice.user.exception.BadCredentialsException;
 import com.epam.training.ticketservice.user.exception.UserPrivilegeException;
 import com.epam.training.ticketservice.user.model.Role;
 import com.epam.training.ticketservice.user.model.User;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Set;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    public void signInPrivilegedUser(String userName, String password) {
-        User user = validateCredentials(userName,password);
+    private Optional<UserDTO> currentUser = Optional.empty();
 
 
-        if (!user.getRoles().contains(Role.ADMIN)) {
-            throw new UserPrivilegeException("Cannot sign in user as admin, username is: " + userName);
+    public Optional<UserDTO> loginPrivileged(String userName, String password) {
+        Optional<User> user = userRepository.findByNameAndPassword(userName, password);
+
+        if (user.isEmpty() || !user.get().getRoles().contains(Role.ADMIN)) {
+            return Optional.empty();
         }
-        //SecurityContext.USER.setUser(Optional.of(user));
-        UserContext.setUser(Optional.of(user));
+        currentUser = Optional.of(convertToDTO(user.get()));
+        return currentUser;
     }
 
-    public void signInBasicUser(String userName, String password) {
-        User user = validateCredentials(userName,password);
+    public Optional<UserDTO> login(String userName, String password) {
+        Optional<User> user = userRepository.findByNameAndPassword(userName, password);
 
-        if (!user.getRoles().contains(Role.USER)) {
-            throw new UserPrivilegeException("Cannot sign in user a basic user, username is: " + userName);
+        if (user.isEmpty() || !user.get().getRoles().contains(Role.USER)) {
+            return Optional.empty();
         }
-        //SecurityContext.USER.setUser(Optional.of(user));
-        UserContext.setUser(Optional.of(user));
-    }
-
-
-    public void signOutUser() {
-        if (UserContext.isUserLoggedIn()) {
-            //SecurityContext.USER.setUser(Optional.empty());
-            UserContext.setUser(Optional.empty());
-        }
+        currentUser = Optional.of(convertToDTO(user.get()));
+        return currentUser;
     }
 
 
-    public void registerUser(String userName, String password) {
-        Optional<User> user = userRepository.findById(userName);
-
-        if (user.isPresent()) {
-            throw new BadCredentialsException("Username is taken");
+    public Optional<UserDTO> logout() {
+        if (currentUser.isEmpty()) {
+            return Optional.empty();
+        } else {
+            Optional<UserDTO> user = currentUser;
+            currentUser = Optional.empty();
+            return user;
         }
+    }
+
+
+    public void register(String userName, String password) {
 
         User userToBeSaved = new User(userName,password, Set.of(Role.USER));
-        userRepository.save(userToBeSaved);
+
+        try {
+            userRepository.save(userToBeSaved);
+        } catch (DataIntegrityViolationException violationException) {
+
+        }
     }
 
-    private User validateCredentials(String userName, String password) {
-        User user = userRepository.findById(userName)
-                .orElseThrow(() -> new BadCredentialsException("No such username " + userName));
+    @Override
+    public Optional<UserDTO> describe() {
+        return currentUser;
+    }
 
-        if (!password.equals(user.getPassword())) {
-            throw new BadCredentialsException("Password is not matching for user " + userName);
-        }
-        return user;
+    private UserDTO convertToDTO(User user){
+        return new UserDTO(user.getName(), user.getRoles());
     }
 
 }

@@ -2,12 +2,12 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.movie.MovieService;
-import com.epam.training.ticketservice.screening.ScreeningId;
 import com.epam.training.ticketservice.screening.exception.OverlappingScreeningBreakTimeException;
 import com.epam.training.ticketservice.screening.exception.OverlappingScreeningException;
 import com.epam.training.ticketservice.screening.Screening;
 import com.epam.training.ticketservice.screening.ScreeningService;
-import com.epam.training.ticketservice.security.UserContext;
+import com.epam.training.ticketservice.user.UserDTO;
+import com.epam.training.ticketservice.user.UserService;
 import com.epam.training.ticketservice.user.model.Role;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @ShellComponent
 public class ScreeningsCommand {
@@ -26,13 +27,15 @@ public class ScreeningsCommand {
     private final ScreeningService screeningService;
     private final MovieService movieService;
     private final DateTimeFormatter dateTimeFormatter;
+    private final UserService userService;
 
     public ScreeningsCommand(ScreeningService screeningService,
                              MovieService movieService,
-                             DateTimeFormatter dateTimeFormatter) {
+                             DateTimeFormatter dateTimeFormatter, UserService userService) {
         this.screeningService = screeningService;
         this.movieService = movieService;
         this.dateTimeFormatter = dateTimeFormatter;
+        this.userService = userService;
     }
 
     @ShellMethod(value = "List all screenings", key = "list screenings")
@@ -64,8 +67,11 @@ public class ScreeningsCommand {
     @ShellMethod(value = "Create a new screening", key = "create screening")
     void createScreening(String movieTitle, String roomName, String startTime) {
         try {
-            ScreeningId screeningId = new ScreeningId(movieTitle, roomName, LocalDateTime.parse(startTime,dateTimeFormatter));
-            screeningService.createScreening(new Screening(screeningId));
+            Screening screening = new Screening();
+            screening.setRoomName(roomName);
+            screening.setMovieTitle(movieTitle);
+            screening.setStartTime(LocalDateTime.parse(startTime,dateTimeFormatter));
+            screeningService.createScreening(screening);
         } catch (OverlappingScreeningException exception) {
             System.out.println("There is an overlapping screening");
         } catch (OverlappingScreeningBreakTimeException exception) {
@@ -89,17 +95,18 @@ public class ScreeningsCommand {
         screeningService.deleteScreening(movieTitle,roomName,startTime);
     }
 
-    @ShellMethodAvailability({"deleteScreening","updateScreening","createScreening"})
     public Availability isAdmin() {
-        return UserContext.userHasRole(Role.ADMIN)
+        Optional<UserDTO> userDTO = userService.describe();
+        return userDTO.isPresent() && userDTO.get().hasRole(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }
 
-    public Availability isBasicUser() {
-        return UserContext.userHasRole(Role.USER)
+    public Availability isUser() {
+        Optional<UserDTO> userDTO = userService.describe();
+        return userDTO.isPresent() && userDTO.get().hasRole(Role.USER)
                 ? Availability.available()
-                : Availability.unavailable("User is not a basic user.");
+                : Availability.unavailable("User is not an admin");
     }
 
 }

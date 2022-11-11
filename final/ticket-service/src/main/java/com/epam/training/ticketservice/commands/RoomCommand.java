@@ -2,7 +2,8 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.room.Room;
 import com.epam.training.ticketservice.room.RoomService;
-import com.epam.training.ticketservice.security.UserContext;
+import com.epam.training.ticketservice.user.UserDTO;
+import com.epam.training.ticketservice.user.UserService;
 import com.epam.training.ticketservice.user.model.Role;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
@@ -10,14 +11,17 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 
 import java.util.List;
+import java.util.Optional;
 
 @ShellComponent
 public class RoomCommand {
 
     private final RoomService roomService;
+    private final UserService userService;
 
-    public RoomCommand(RoomService roomService) {
+    public RoomCommand(RoomService roomService, UserService userService) {
         this.roomService = roomService;
+        this.userService = userService;
     }
 
     @ShellMethodAvailability("isAdmin")
@@ -55,10 +59,9 @@ public class RoomCommand {
         }
     }
 
-
     public Availability isAdmin() {
-
-        return UserContext.userHasRole(Role.ADMIN)
+        Optional<UserDTO> userDTO = userService.describe();
+        return userDTO.isPresent() && userDTO.get().hasRole(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }
