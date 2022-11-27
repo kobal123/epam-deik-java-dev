@@ -26,7 +26,7 @@ class UserServiceImplTest {
         when(userRepository.findByNameAndPassword("user", "pass")).thenReturn(Optional.of(user));
 
         // When
-        Optional<UserDTO> actual = underTest.login("user", "pass");
+        Optional<UserDto> actual = underTest.login("user", "pass");
 
         // Then
         assertEquals(expected.get().getName(), actual.get().getName());
@@ -37,11 +37,11 @@ class UserServiceImplTest {
     @Test
     void testLoginShouldReturnOptionalEmptyWhenUsernameOrPasswordAreNotCorrect() {
         // Given
-        Optional<UserDTO> expected = Optional.empty();
+        Optional<UserDto> expected = Optional.empty();
         when(userRepository.findByNameAndPassword("dummy", "dummy")).thenReturn(Optional.empty());
 
         // When
-        Optional<UserDTO> actual = underTest.login("dummy", "dummy");
+        Optional<UserDto> actual = underTest.login("dummy", "dummy");
 
         // Then
         assertEquals(expected, actual);
@@ -51,10 +51,10 @@ class UserServiceImplTest {
     @Test
     void testLogoutShouldReturnOptionalEmptyWhenThereIsNoOneLoggedIn() {
         // Given
-        Optional<UserDTO> expected = Optional.empty();
+        Optional<UserDto> expected = Optional.empty();
 
         // When
-        Optional<UserDTO> actual = underTest.logout();
+        Optional<UserDto> actual = underTest.logout();
 
         // Then
         assertEquals(expected, actual);
@@ -65,10 +65,10 @@ class UserServiceImplTest {
         // Given
         User user = new User("user", "password", Set.of(Role.USER));
         when(userRepository.findByNameAndPassword("user", "pass")).thenReturn(Optional.of(user));
-        Optional<UserDTO> expected = underTest.login("user", "password");
+        Optional<UserDto> expected = underTest.login("user", "password");
 
         // When
-        Optional<UserDTO> actual = underTest.logout();
+        Optional<UserDto> actual = underTest.logout();
 
         // Then
         assertEquals(expected, actual);
@@ -79,10 +79,10 @@ class UserServiceImplTest {
         // Given
         User user = new User("user", "password", Set.of(Role.USER));
         when(userRepository.findByNameAndPassword("user", "pass")).thenReturn(Optional.of(user));
-        Optional<UserDTO> expected = underTest.login("user", "password");
+        Optional<UserDto> expected = underTest.login("user", "password");
 
         // When
-        Optional<UserDTO> actual = underTest.describe();
+        Optional<UserDto> actual = underTest.describe();
 
         // Then
         assertEquals(expected, actual);
@@ -91,10 +91,10 @@ class UserServiceImplTest {
     @Test
     void testDescribeShouldReturnOptionalEmptyWhenThereIsNoOneLoggedIn() {
         // Given
-        Optional<UserDTO> expected = Optional.empty();
+        Optional<UserDto> expected = Optional.empty();
 
         // When
-        Optional<UserDTO> actual = underTest.describe();
+        Optional<UserDto> actual = underTest.describe();
 
         // Then
         assertEquals(expected, actual);

@@ -1,10 +1,10 @@
 package com.epam.training.ticketservice.movie;
 
-import com.epam.training.ticketservice.movie.exception.MovieNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieServiceImpl implements MovieService {
@@ -17,39 +17,50 @@ public class MovieServiceImpl implements MovieService {
 
 
     @Override
-    public void updateMovie(Movie movie) {
-        Optional<Movie> optionalMovie = movieRepository.findById(movie.getName());
-        if (optionalMovie.isEmpty()) {
-            throw new MovieNotFoundException(
-                    String.format("Updating movie %s failed, movie does not exists",movie.getName())
-            );
-        }
-        movieRepository.save(movie);
+    public void updateMovie(MovieDto movie) {
+        Movie movieToUpdate = movieRepository.findByName(movie.getName())
+                .orElseThrow(() -> new IllegalArgumentException("Movie does not exists")
+                );
+        updateMovieWithMovieDto(movieToUpdate, movie);
+        movieRepository.save(movieToUpdate);
     }
 
     @Override
     public void deleteMovieByName(String name) {
-        Optional<Movie> optionalMovie = movieRepository.findById(name);
-        if (optionalMovie.isEmpty()) {
-            throw new MovieNotFoundException(
-                    String.format("Deleting movie %s failed, movie does not exists",name)
-            );
-        }
-        movieRepository.save(optionalMovie.get());    }
+        Movie movie = movieRepository.findByName(name).orElseThrow(() -> new IllegalArgumentException(
+                String.format("Deleting movie %s failed, movie does not exists", name)));
 
-    @Override
-    public void createMovie(Movie movie) {
-        movieRepository.save(movie);
+        movieRepository.deleteById(movie.getId());
     }
 
     @Override
-    public Optional<Movie> getMovieByName(String name) {
-        return movieRepository.findById(name);
+    public void createMovie(MovieDto movie) {
+        Movie movieToSave = movieFromDto(movie);
+        movieRepository.save(movieToSave);
     }
 
     @Override
-    public List<Movie> getAllMovies() {
-        return movieRepository.findAll();
+    public Optional<MovieDto> getMovieByName(String name) {
+        Movie movie = movieRepository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Could not find movie!"));
+        MovieDto dto = convertToDto(movie);
+        return Optional.of(dto);
     }
 
+    @Override
+    public List<MovieDto> getAllMovies() {
+        return movieRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    private void updateMovieWithMovieDto(Movie movie,MovieDto dto) {
+        movie.setName(dto.getName());
+        movie.setGenre(dto.getGenre());
+        movie.setScreenTime(dto.getScreenTime());
+    }
+
+    private Movie movieFromDto(MovieDto dto) {
+        return new Movie(dto.getName(), dto.getGenre(), dto.getScreenTime());
+    }
+    private MovieDto convertToDto(Movie movie) {
+        return new MovieDto(movie.getName(), movie.getGenre(), movie.getScreenTime());
+    }
 }

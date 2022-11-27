@@ -1,7 +1,10 @@
 package com.epam.training.ticketservice.screening;
 
 import com.epam.training.ticketservice.movie.Movie;
+import com.epam.training.ticketservice.movie.MovieDto;
 import com.epam.training.ticketservice.movie.MovieRepository;
+import com.epam.training.ticketservice.movie.MovieService;
+import com.epam.training.ticketservice.movie.MovieServiceImpl;
 import com.epam.training.ticketservice.room.Room;
 import com.epam.training.ticketservice.screening.exception.OverlappingScreeningBreakTimeException;
 import com.epam.training.ticketservice.screening.exception.OverlappingScreeningException;
@@ -31,13 +34,13 @@ class ScreeningServiceImplTest {
     @Mock
     private ScreeningRepository screeningRepository;// = Mockito.mock(ScreeningRepository.class);
     @Mock
-    private MovieRepository movieRepository;// = Mockito.mock(MovieRepository.class);
+    private MovieService movieService;// = Mockito.mock(MovieRepository.class);
+    @Mock
+    private MovieRepository movieRepository;
     @InjectMocks
     private  ScreeningServiceImpl underTest;// = new ScreeningServiceImpl(formatter, screeningRepository,movieRepository );
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private LocalDateTime existingScreeningStartTime = LocalDateTime.parse("2002-04-11 14:00", formatter);
-    private LocalDateTime screeningToSaveStartTime = LocalDateTime.parse("2002-04-11 16:05", formatter);
 
     @Test
     void testValidationShouldThrowOverlappingScreeningExceptionWhenScreeningStartsInInSameRoom() {
@@ -49,15 +52,15 @@ class ScreeningServiceImplTest {
                 "Room",
                 existingScreeningStartTime);
 
-        Screening screeningToSave = new Screening("Movie2",
+        ScreeningDto screeningToSave = new ScreeningDto("Movie2",
                 "Room",
                 screeningToSaveStartTime);
         Movie movieOne = new Movie("Movie", "drama", 135);
         Movie movieTwo = new Movie("Movie2", "action", 200);
         List<Screening> screenings = List.of(existingScreening);
         when(screeningRepository.findAll()).thenReturn(screenings);
-        when(movieRepository.findById(existingScreening.getMovieTitle())).thenReturn(Optional.of(movieOne));
-        when(movieRepository.findById(screeningToSave.getMovieTitle())).thenReturn(Optional.of(movieTwo));
+        when(movieRepository.findByName(existingScreening.getMovieTitle())).thenReturn(Optional.of(movieOne));
+        when(movieRepository.findByName(screeningToSave.getMovieTitle())).thenReturn(Optional.of(movieTwo));
 
         // When
         // Then
@@ -76,38 +79,41 @@ class ScreeningServiceImplTest {
                 "Room",
                 existingScreeningStartTime);
 
-        Screening screeningToSave = new Screening("Movie2",
+        ScreeningDto screeningToSave = new ScreeningDto("Movie2",
                 "Room",
                 screeningToSaveStartTime);
         Movie movieOne = new Movie("Movie", "drama", 120);
         Movie movieTwo = new Movie("Movie2", "action", 200);
         List<Screening> screenings = List.of(existingScreening);
         when(screeningRepository.findAll()).thenReturn(screenings);
-        when(movieRepository.findById(existingScreening.getMovieTitle())).thenReturn(Optional.of(movieOne));
-        when(movieRepository.findById(screeningToSave.getMovieTitle())).thenReturn(Optional.of(movieTwo));
+        when(movieRepository.findByName("Movie")).thenReturn(Optional.of(movieOne));
+        when(movieRepository.findByName("Movie2")).thenReturn(Optional.of(movieTwo));
 
         // When
         // Then
         assertThrows(OverlappingScreeningBreakTimeException.class,
                 () -> underTest.createScreening(screeningToSave));
+        verify(movieRepository).findByName("Movie");
+        verify(movieRepository).findByName("Movie2");
     }
 
     @Test
     void testDateValidationShouldPassWhenScreeningStartsInBreakTimeInDifferentRoom() {
         // Given
+        LocalDateTime existingScreeningStartTime = LocalDateTime.parse("2002-04-11 14:00", formatter);
+        LocalDateTime screeningToSaveStartTime = LocalDateTime.parse("2002-04-11 16:05", formatter);
+
         Screening existingScreening = new Screening("Movie",
                 "Room",
                 existingScreeningStartTime);
 
-        Screening screeningToSave = new Screening("Movie2",
+        ScreeningDto screeningToSave = new ScreeningDto("Movie2",
                 "Room2",
                 screeningToSaveStartTime);
         Movie movieOne = new Movie("Movie", "drama", 120);
         Movie movieTwo = new Movie("Movie2", "action", 200);
         List<Screening> screenings = List.of(existingScreening);
-        //when(movieRepository.findById(existingScreening.getMovieTitle())).thenReturn(Optional.of(movieOne));
-        //when(movieRepository.findById(screeningToSave.getMovieTitle())).thenReturn(Optional.of(movieTwo));
-        when(screeningRepository.save(screeningToSave)).thenReturn(screeningToSave);
+        when(screeningRepository.findAll()).thenReturn(screenings);
 
         // When
         // Then
@@ -115,21 +121,30 @@ class ScreeningServiceImplTest {
     }
 
     @Test
-    void updateScreening() {
+    void testDeleteScreeningShouldThrowIllegalArgumentExceptionWhenScreeningDoesNotExists() {
+        LocalDateTime screeningToSaveStartTime = LocalDateTime.parse("2002-04-11 16:05", formatter);
+
+        ScreeningDto screeningToDelete = new ScreeningDto("Movie2",
+                "Room",
+                screeningToSaveStartTime);
+
+        when(screeningRepository.
+                findScreeningByMovieAndRoomAndStartTime(
+                        screeningToDelete.getMovieTitle(),
+                        screeningToDelete.getRoomName(),
+                        screeningToDelete.getStartTime()))
+                .thenReturn(Optional.empty());
 
 
-    }
+        // When
+        // Then
+        assertThrows(IllegalArgumentException.class,
+                () -> underTest.deleteScreening(screeningToDelete));
 
-    @Test
-    void testUpdateScreening() {
-    }
-
-    @Test
-    void deleteScreening() {
-    }
-
-    @Test
-    void getScreeningById() {
+        verify(screeningRepository).findScreeningByMovieAndRoomAndStartTime(
+                screeningToDelete.getMovieTitle(),
+                screeningToDelete.getRoomName(),
+                screeningToDelete.getStartTime());
     }
 
 }

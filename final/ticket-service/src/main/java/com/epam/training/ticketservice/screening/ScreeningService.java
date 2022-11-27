@@ -7,16 +7,15 @@ import java.util.Optional;
 public interface ScreeningService {
 
 
-    void createScreening(Screening screening);
+    void createScreening(ScreeningDto screening);
 
 
-    void deleteScreening(String movieName,String room, String startTime);
+    void deleteScreening(ScreeningDto screeningDto);
 
-    Optional<Screening> getScreeningById(Long screeningId);
 
-    List<Screening> getAllScreenings();
+    List<ScreeningDto> getAllScreenings();
 
-    void updateScreening(Screening screening);
+    void updateScreening(ScreeningDto screening);
 
     Optional<Screening> getScreeningByMovieAndRoomAndStartTime(String movie, String room, LocalDateTime start);
 

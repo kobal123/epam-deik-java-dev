@@ -1,10 +1,8 @@
 package com.epam.training.ticketservice.user;
 
-import com.epam.training.ticketservice.user.exception.UserPrivilegeException;
 import com.epam.training.ticketservice.user.model.Role;
 import com.epam.training.ticketservice.user.model.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,59 +14,50 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private Optional<UserDTO> currentUser = Optional.empty();
+    private UserDto loggedInUser = null;
 
-
-    public Optional<UserDTO> loginPrivileged(String userName, String password) {
+/*
+    public Optional<UserDto> loginPrivileged(String userName, String password) {
         Optional<User> user = userRepository.findByNameAndPassword(userName, password);
 
         if (user.isEmpty() || !user.get().getRoles().contains(Role.ADMIN)) {
             return Optional.empty();
         }
-        currentUser = Optional.of(convertToDTO(user.get()));
-        return currentUser;
-    }
+        loggedInUser = Optional.of(convertToDTO(user.get()));
+        return loggedInUser;
+    }*/
 
-    public Optional<UserDTO> login(String userName, String password) {
-        Optional<User> user = userRepository.findByNameAndPassword(userName, password);
 
-        if (user.isEmpty() || !user.get().getRoles().contains(Role.USER)) {
+    @Override
+    public Optional<UserDto> login(String username, String password) {
+        Optional<User> user = userRepository.findByNameAndPassword(username, password);
+        if (user.isEmpty()) {
             return Optional.empty();
         }
-        currentUser = Optional.of(convertToDTO(user.get()));
-        return currentUser;
-    }
-
-
-    public Optional<UserDTO> logout() {
-        if (currentUser.isEmpty()) {
-            return Optional.empty();
-        } else {
-            Optional<UserDTO> user = currentUser;
-            currentUser = Optional.empty();
-            return user;
-        }
-    }
-
-
-    public void register(String userName, String password) {
-
-        User userToBeSaved = new User(userName,password, Set.of(Role.USER));
-
-        try {
-            userRepository.save(userToBeSaved);
-        } catch (DataIntegrityViolationException violationException) {
-
-        }
+        loggedInUser = convertToDTO(user.get());
+        return describe();
     }
 
     @Override
-    public Optional<UserDTO> describe() {
-        return currentUser;
+    public Optional<UserDto> logout() {
+        Optional<UserDto> previouslyLoggedInUser = describe();
+        loggedInUser = null;
+        return previouslyLoggedInUser;
     }
 
-    private UserDTO convertToDTO(User user){
-        return new UserDTO(user.getName(), user.getRoles());
+    @Override
+    public Optional<UserDto> describe() {
+        return Optional.ofNullable(loggedInUser);
+    }
+
+    @Override
+    public void register(String username, String password) {
+        User user = new User(username, password, Set.of(Role.USER));
+        userRepository.save(user);
+    }
+
+    private UserDto convertToDTO(User user){
+        return new UserDto(user.getName(), user.getRoles());
     }
 
 }

@@ -42,14 +42,18 @@ public class Seat implements Serializable {
     @JoinColumn(name = "screening_id", referencedColumnName = "id")
     private Screening screening;
 
+    public Seat(Integer seatRow, Integer seatCol) {
+        this.seatRow = seatRow;
+        this.seatCol = seatCol;
+    }
 
     @Override
     public String toString() {
-        return "Seat{" +
-                "id=" + id +
-                ", seatRow=" + seatRow +
-                ", seatCol=" + seatCol +
-                '}';
+        return "Seat{"
+                + "id=" + id
+                + ", seatRow=" + seatRow
+                + ", seatCol=" + seatCol
+                + '}';
     }
 
 }

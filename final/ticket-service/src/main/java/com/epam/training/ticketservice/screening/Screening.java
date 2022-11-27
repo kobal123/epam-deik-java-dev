@@ -26,7 +26,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -48,8 +47,11 @@ public class Screening implements Serializable {
     @Column(name = "start_time")
     private LocalDateTime startTime;
 
+    private Long ticketPrice = 1500L;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Booking> bookings = new ArrayList<>();
+
 
 
     public void addBooking(Booking booking) {
@@ -60,5 +62,15 @@ public class Screening implements Serializable {
         this.movieTitle = movieTitle;
         this.roomName = roomName;
         this.startTime = startTime;
+    }
+
+    @Override
+    public String toString() {
+        return "Screening{" +
+                "id=" + id +
+                ", movieTitle='" + movieTitle + '\'' +
+                ", roomName='" + roomName + '\'' +
+                ", startTime=" + startTime +
+                '}';
     }
 }

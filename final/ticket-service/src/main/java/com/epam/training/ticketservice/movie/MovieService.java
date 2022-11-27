@@ -5,13 +5,13 @@ import java.util.Optional;
 
 public interface MovieService {
 
-    void updateMovie(Movie movie);
+    void updateMovie(MovieDto movie);
 
     void deleteMovieByName(String name);
 
-    void createMovie(Movie movie);
+    void createMovie(MovieDto movie);
 
-    Optional<Movie> getMovieByName(String name);
+    Optional<MovieDto> getMovieByName(String name);
 
-    List<Movie> getAllMovies();
+    List<MovieDto> getAllMovies();
 }

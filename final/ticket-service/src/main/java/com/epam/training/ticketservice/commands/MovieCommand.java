@@ -1,8 +1,9 @@
 package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.movie.Movie;
+import com.epam.training.ticketservice.movie.MovieDto;
 import com.epam.training.ticketservice.movie.MovieService;
-import com.epam.training.ticketservice.user.UserDTO;
+import com.epam.training.ticketservice.user.UserDto;
 import com.epam.training.ticketservice.user.UserService;
 import com.epam.training.ticketservice.user.model.Role;
 import org.springframework.shell.Availability;
@@ -25,13 +26,13 @@ public class MovieCommand {
 
     @ShellMethod(value = "Create a new movie", key = "create movie")
     void createMovie(String title, String genre, int screenTime) {
-        Movie movie = new Movie(title, genre, screenTime);
+        MovieDto movie = new MovieDto(title, genre, screenTime);
         movieService.createMovie(movie);
     }
 
     @ShellMethod(value = "Update a movie", key = "update movie")
     void updateMovie(String title, String genre, int screenTime) {
-        Movie movie = new Movie(title, genre, screenTime);
+        MovieDto movie = new MovieDto(title, genre, screenTime);
         movieService.updateMovie(movie);
 
     }
@@ -44,7 +45,7 @@ public class MovieCommand {
 
     @ShellMethod(value = "List all movies", key = "list movies")
     void listMovies() {
-        List<Movie> movies = movieService.getAllMovies();
+        List<MovieDto> movies = movieService.getAllMovies();
 
         if (movies.isEmpty()) {
             System.out.println("There are no movies at the moment");
@@ -61,8 +62,9 @@ public class MovieCommand {
 
     @ShellMethodAvailability({"deleteMovie","updateMovie","createMovie"})
     public Availability isAdmin() {
-        Optional<UserDTO> userDTO = userService.describe();
-        return userDTO.isPresent() && userDTO.get().hasRole(Role.ADMIN)
+        Optional<UserDto> userDTO = userService.describe();
+
+        return userDTO.isPresent() && userDTO.get().getRoles().contains(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }

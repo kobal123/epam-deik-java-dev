@@ -4,11 +4,11 @@ import java.util.List;
 
 public interface RoomService {
 
-    void createRoom(Room room);
+    void createRoom(RoomDto room);
 
-    void updateRoom(Room room);
+    void updateRoom(RoomDto room);
 
     void deleteRoomByName(String name);
 
-    List<Room> getAllRooms();
+    List<RoomDto> getAllRooms();
 }

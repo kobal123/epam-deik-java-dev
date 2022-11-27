@@ -1,44 +1,42 @@
 package com.epam.training.ticketservice.commands;
 
-import com.epam.training.ticketservice.booking.Booking;
+import com.epam.training.ticketservice.booking.BookingDto;
 import com.epam.training.ticketservice.booking.BookingService;
+import com.epam.training.ticketservice.booking.SeatDto;
 import com.epam.training.ticketservice.booking.SeatRepository;
-import com.epam.training.ticketservice.user.UserDTO;
+import com.epam.training.ticketservice.screening.ScreeningDto;
+import com.epam.training.ticketservice.user.UserDto;
 import com.epam.training.ticketservice.user.UserService;
 import com.epam.training.ticketservice.user.UserServiceImpl;
 import com.epam.training.ticketservice.user.exception.BadCredentialsException;
 import com.epam.training.ticketservice.user.exception.UserPrivilegeException;
 import com.epam.training.ticketservice.user.model.Role;
-import com.epam.training.ticketservice.user.model.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.StringJoiner;
 
 @ShellComponent
+@RequiredArgsConstructor
 public class UserCommand {
-    private final UserServiceImpl userServiceImpl;
+    //private final UserServiceImpl userServiceImpl;
     private final String loginFailedMessage = "Login failed due to incorrect credentials";
     private final BookingService bookingService;
     private final SeatRepository seatRepository;
     private final UserService userService;
-    public UserCommand(UserServiceImpl userServiceImpl, BookingService bookingService, SeatRepository seatRepository, UserService userService) {
-        this.userServiceImpl = userServiceImpl;
-        this.bookingService = bookingService;
-        this.seatRepository = seatRepository;
-        this.userService = userService;
-    }
+    private final DateTimeFormatter formatter;
 
     @ShellMethod(value = "Sign in as a privileged user", key = "sign in privileged")
     public void signInPrivileged(String username,String password) {
-        try {
-            userServiceImpl.loginPrivileged(username,password);
-        } catch (BadCredentialsException badCredentialsException) {
+        Optional<UserDto> user = userService.login(username,password);
+        if (user.isEmpty()) {
             System.out.println(loginFailedMessage);
-        } catch (UserPrivilegeException userPrivilegeException) {
-            System.out.println(userPrivilegeException.getMessage());
         }
     }
 
@@ -46,18 +44,15 @@ public class UserCommand {
 
     @ShellMethod(value = "Sign out from current account", key = "sign out")
     public void signOut() {
-        userServiceImpl.logout();
+        userService.logout();
     }
 
 
     @ShellMethod(value = "Sign in as a basic user", key = "sign in")
     public void signIn(String username,String password) {
-        try {
-            userServiceImpl.login(username,password);
-        } catch (BadCredentialsException badCredentialsException) {
+        Optional<UserDto> user = userService.login(username,password);
+        if (user.isEmpty()) {
             System.out.println(loginFailedMessage);
-        } catch (UserPrivilegeException userPrivilegeException) {
-            System.out.println(userPrivilegeException.getMessage());
         }
     }
 
@@ -65,8 +60,8 @@ public class UserCommand {
     @ShellMethod(value = "Register a new user", key = "sign up")
     public String signUp(String username, String password) {
 
-        try{
-            userServiceImpl.register(username, password);
+        try {
+            userService.register(username, password);
             return String.format("Successfully registered user %s", username);
         } catch (DataIntegrityViolationException exception) {
             return String.format("Failed to  register user %s", username);
@@ -76,20 +71,21 @@ public class UserCommand {
 
     @ShellMethod(value = "Gives information about the currently logged in account", key = "describe account")
     public void describeAccount() {
-        Optional<UserDTO> optionalUserDTO = userService.describe();
+        Optional<UserDto> optionalUserDTO = userService.describe();
         if (optionalUserDTO.isEmpty()) {
             System.out.println("You are not signed in");
             return;
         }
-        UserDTO user = optionalUserDTO.get();
-        if (user.hasRole(Role.ADMIN)) {
+        UserDto user = optionalUserDTO.get();
+        Set<Role> userRoles = user.getRoles();
+        if (userRoles.contains(Role.ADMIN)) {
             System.out.println(String.format("Signed in with privileged account '%s'",
                     user.getName()));
-        } else if (user.hasRole(Role.USER)) {
+        } else if (userRoles.contains(Role.USER)) {
             System.out.println(String.format("Signed in with account '%s'",
                     user.getName()));
 
-            List<Booking> bookings = bookingService.getBookingsByUsername(user.getName());
+            List<BookingDto> bookings = bookingService.getBookingsByUsername(user.getName());
             if (bookings.isEmpty()) {
                 System.out.println("You have not booked any tickets yet");
             } else {
@@ -98,13 +94,28 @@ public class UserCommand {
         }
     }
 
-    private void displayBookings(List<Booking> bookings) {
-        //System.out.println("Your previous bookings are");
-        //System.out.println(bookings.get(0).getScreening());
-        String bookingFormat = "Seats %s, %s on %s in room %s starting at %s for %i HUF";
+    private void displayBookings(List<BookingDto> bookings) {
+        System.out.println("Your previous bookings are");
+        String format = "Seats %s on %s in room %s starting at %s for %d HUF";
+        for (BookingDto bookingDto : bookings) {
 
-        System.out.println(seatRepository.findAll());
-        System.out.println(bookingService.getAllBookings());
+            StringJoiner joiner = new StringJoiner(", ");
+            String seatFormat = "(%d,%d)";
+            ScreeningDto screening = bookingDto.getScreeningDto();
+            for(SeatDto seat : bookingDto.getSeats()) {
+
+                joiner.add(String.format(seatFormat,seat.getSeatRow(),seat.getSeatCol()));
+            }
+
+            System.out.println(String.format(
+                    format,
+                    joiner,
+                    screening.getMovieTitle(),
+                    screening.getRoomName(),
+                    formatter.format(screening.getStartTime()),
+                    bookingDto.getTotalPrice()));
+        }
+
 
     }
 }

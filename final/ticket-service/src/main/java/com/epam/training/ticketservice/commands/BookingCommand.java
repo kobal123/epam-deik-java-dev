@@ -1,67 +1,76 @@
 package com.epam.training.ticketservice.commands;
 
-import com.epam.training.ticketservice.booking.*;
-import com.epam.training.ticketservice.screening.Screening;
+import com.epam.training.ticketservice.booking.BookingDto;
+import com.epam.training.ticketservice.booking.BookingService;
+import com.epam.training.ticketservice.booking.Seat;
+import com.epam.training.ticketservice.booking.SeatDto;
+import com.epam.training.ticketservice.booking.SeatService;
+import com.epam.training.ticketservice.screening.ScreeningDto;
 import com.epam.training.ticketservice.screening.ScreeningRepository;
 import com.epam.training.ticketservice.screening.ScreeningService;
-import com.epam.training.ticketservice.user.UserDTO;
 import com.epam.training.ticketservice.user.UserService;
-import com.epam.training.ticketservice.user.model.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 
 @ShellComponent
+@RequiredArgsConstructor
 public class BookingCommand {
-    private BookingService bookingService;
-    private DateTimeFormatter dateTimeFormatter;
-    private UserService userService;
-
-    public BookingCommand(BookingService bookingService, ScreeningService screeningService, DateTimeFormatter dateTimeFormatter, ScreeningRepository screeningRepository) {
-        this.bookingService = bookingService;
-        this.dateTimeFormatter = dateTimeFormatter;
-    }
+    private final BookingService bookingService;
+    private final DateTimeFormatter dateTimeFormatter;
+    private final UserService userService;
+    private final SeatService seatService;
+    private final String messageFormat = "Seats booked: %s; the price for this booking is %d HUF";
+    private final String seatFormat = "(%d,%d)";
 
     @ShellMethod(key = "book")
     void book(String movieTitle, String roomName, String startTime, String seats) {
 
-        UserDTO user = userService.describe().get();
+        ScreeningDto screening = new ScreeningDto(
+                movieTitle,
+                roomName,
+                LocalDateTime.parse(startTime, dateTimeFormatter)
+        );
+        List<SeatDto> setOfSeats = parseSeats(seats);
+        List<SeatDto> alreadyBookedSeats = seatService.getSeatsForScreening(screening);
 
+        for (SeatDto seat : setOfSeats) {
+            if (alreadyBookedSeats.contains(seat)) {
+                String format = "Seat (%d,%d) is already taken";
+                System.out.println(String.format(format, seat.getSeatRow(), seat.getSeatCol()));
+                return;
+            }
+        }
 
-        Screening screening = new Screening();
-        screening.setMovieTitle(movieTitle);
-        screening.setRoomName(roomName);
-        screening.setStartTime(LocalDateTime.parse(startTime,dateTimeFormatter));
+        BookingDto booking = bookingService.createBooking(screening, new HashSet<>(setOfSeats));
+        StringJoiner joiner = new StringJoiner(", ");
+        for (SeatDto seat : setOfSeats) {
+            joiner.add(String.format(seatFormat, seat.getSeatRow(), seat.getSeatCol()));
+        }
+        System.out.println(String.format(messageFormat, joiner, booking.getTotalPrice()));
 
-        Set<Seat> setOfSeats = parseSeats(seats);
-
-        Booking booking = new Booking();
-        booking.setUsername(user.getName());
-        booking.setSeats(setOfSeats);
-        booking.setScreening(screening);
-        bookingService.createBooking(booking);
     }
 
-
-    private Set<Seat> parseSeats(String input) {
+    private List<SeatDto> parseSeats(String input) {
         String[] seatRowCol = input.split(" ");
-        Set<Seat> seats = new HashSet<>();
+        List<SeatDto> seats = new ArrayList<>();
         for (String position : seatRowCol) {
             String[] rowAndCol = position.split(",");
             int row = Integer.parseInt(rowAndCol[0]);
             int col = Integer.parseInt(rowAndCol[1]);
 
-            Seat seat = new Seat();
-            seat.setSeatCol(col);
-            seat.setSeatRow(row);
+            SeatDto seat = new SeatDto(row, col);
             seats.add(seat);
         }
         return seats;
     }
-
-
 }

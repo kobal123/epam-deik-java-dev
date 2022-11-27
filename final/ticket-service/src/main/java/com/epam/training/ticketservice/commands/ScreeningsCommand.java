@@ -1,19 +1,19 @@
 package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.movie.Movie;
+import com.epam.training.ticketservice.movie.MovieDto;
 import com.epam.training.ticketservice.movie.MovieService;
+import com.epam.training.ticketservice.screening.ScreeningDto;
 import com.epam.training.ticketservice.screening.exception.OverlappingScreeningBreakTimeException;
 import com.epam.training.ticketservice.screening.exception.OverlappingScreeningException;
-import com.epam.training.ticketservice.screening.Screening;
 import com.epam.training.ticketservice.screening.ScreeningService;
-import com.epam.training.ticketservice.user.UserDTO;
+import com.epam.training.ticketservice.user.UserDto;
 import com.epam.training.ticketservice.user.UserService;
 import com.epam.training.ticketservice.user.model.Role;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
-
 import java.text.Collator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,15 +40,15 @@ public class ScreeningsCommand {
 
     @ShellMethod(value = "List all screenings", key = "list screenings")
     void listScreenings() {
-        List<Screening> screenings = screeningService.getAllScreenings();
-        screenings.sort(Comparator.comparing(Screening::getMovieTitle,Collator.getInstance()));
+        List<ScreeningDto> screenings = screeningService.getAllScreenings();
+        screenings.sort(Comparator.comparing(ScreeningDto::getMovieTitle, Collator.getInstance()));
         if (screenings.isEmpty()) {
             System.out.println("There are no screenings");
         }
 
         String format = "%s (%s, %d minutes), screened in room %s, at %s";
-        for (Screening screening : screenings) {
-            Movie movie = movieService.getMovieByName(screening.getMovieTitle())
+        for (ScreeningDto screening : screenings) {
+            MovieDto movie = movieService.getMovieByName(screening.getMovieTitle())
                     .orElseThrow(() -> new RuntimeException("movie does not exists"));
 
             String message = String.format(format,
@@ -67,11 +67,8 @@ public class ScreeningsCommand {
     @ShellMethod(value = "Create a new screening", key = "create screening")
     void createScreening(String movieTitle, String roomName, String startTime) {
         try {
-            Screening screening = new Screening();
-            screening.setRoomName(roomName);
-            screening.setMovieTitle(movieTitle);
-            screening.setStartTime(LocalDateTime.parse(startTime,dateTimeFormatter));
-            screeningService.createScreening(screening);
+            ScreeningDto screeningDto = screeningDtoFromData(movieTitle, roomName, startTime);
+            screeningService.createScreening(screeningDto);
         } catch (OverlappingScreeningException exception) {
             System.out.println("There is an overlapping screening");
         } catch (OverlappingScreeningBreakTimeException exception) {
@@ -82,31 +79,36 @@ public class ScreeningsCommand {
     @ShellMethodAvailability("isAdmin")
     @ShellMethod(value = "Update a screening", key = "update screening")
     void updateScreening(String movieTitle, String roomName, String startTime) {
-        Screening screening = new Screening();
-        screening.setMovieTitle(movieTitle);
-        screening.setRoomName(roomName);
-        screening.setStartTime(LocalDateTime.parse(startTime, dateTimeFormatter));
-        screeningService.updateScreening(screening);
+        ScreeningDto screeningDto = screeningDtoFromData(movieTitle, roomName, startTime);
+        screeningService.updateScreening(screeningDto);
     }
 
     @ShellMethodAvailability("isAdmin")
     @ShellMethod(value = "Delete a screening", key = "delete screening")
     void deleteScreening(String movieTitle, String roomName, String startTime) {
-        screeningService.deleteScreening(movieTitle,roomName,startTime);
+        ScreeningDto screeningDto = screeningDtoFromData(movieTitle, roomName, startTime);
+        screeningService.deleteScreening(screeningDto);
     }
 
     public Availability isAdmin() {
-        Optional<UserDTO> userDTO = userService.describe();
-        return userDTO.isPresent() && userDTO.get().hasRole(Role.ADMIN)
+        Optional<UserDto> userDTO = userService.describe();
+        return userDTO.isPresent() && userDTO.get().getRoles().contains(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }
 
     public Availability isUser() {
-        Optional<UserDTO> userDTO = userService.describe();
-        return userDTO.isPresent() && userDTO.get().hasRole(Role.USER)
+        Optional<UserDto> userDTO = userService.describe();
+        return userDTO.isPresent() && userDTO.get().getRoles().contains(Role.USER)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
+    }
+
+    private ScreeningDto screeningDtoFromData(String movieTitle, String roomName, String startTime) {
+        return new ScreeningDto(
+                movieTitle,
+                roomName,
+                LocalDateTime.parse(startTime, dateTimeFormatter));
     }
 
 }

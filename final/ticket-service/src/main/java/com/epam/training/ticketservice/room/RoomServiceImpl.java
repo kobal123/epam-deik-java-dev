@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RoomServiceImpl implements RoomService {
@@ -16,34 +17,59 @@ public class RoomServiceImpl implements RoomService {
 
 
     @Override
-    public void createRoom(Room room) {
-        Optional<Room> roomByName = roomRepository.findById(room.getName());
+    public void createRoom(RoomDto room) {
+        Optional<Room> roomByName = roomRepository.findByName(room.getName());
         if (roomByName.isPresent()) {
             throw new IllegalArgumentException("Room already exists");
         }
-        roomRepository.save(room);
+        Room roomToSave = convertDtoToRoom(room);
+        roomRepository.save(roomToSave);
     }
 
     @Override
-    public void updateRoom(Room room) {
-        Optional<Room> roomByName = roomRepository.findById(room.getName());
-        if (roomByName.isEmpty()) {
-            throw new IllegalArgumentException("Room does not exists");
-        }
-        roomRepository.save(room);
+    public void updateRoom(RoomDto room) {
+        Room roomToUpdate = roomRepository.findByName(room.getName())
+                .orElseThrow(() -> new IllegalArgumentException("Room does not exists"));
+
+        roomToUpdate = updateRoomFromDto(roomToUpdate, room);
+        roomRepository.save(roomToUpdate);
     }
 
     @Override
     public void deleteRoomByName(String name) {
-        Optional<Room> roomByName = roomRepository.findById(name);
-        if (roomByName.isEmpty()) {
-            throw new IllegalArgumentException("Room does not exists");
-        }
-        roomRepository.deleteById(name);
+        Room roomToDelete = roomRepository.findByName(name)
+                .orElseThrow(() -> new IllegalArgumentException("Room does not exists"));
+        roomRepository.deleteById(roomToDelete.getId());
     }
 
     @Override
-    public List<Room> getAllRooms() {
-        return roomRepository.findAll();
+    public List<RoomDto> getAllRooms() {
+        return roomRepository.findAll()
+                .stream()
+                .map(this::convertRoomToDto)
+                .collect(Collectors.toList());
+    }
+
+    private Room updateRoomFromDto(Room room, RoomDto dto) {
+        room.setName(dto.getName());
+        room.setSeatRows(dto.getSeatRows());
+        room.setSeatCols(dto.getSeatCols());
+        return room;
+    }
+
+    private RoomDto convertRoomToDto(Room room) {
+        return new RoomDto(
+                room.getName(),
+                room.getSeatRows(),
+                room.getSeatCols()
+        );
+    }
+
+    private Room convertDtoToRoom(RoomDto dto) {
+        return new Room(
+                dto.getName(),
+                dto.getSeatRows(),
+                dto.getSeatCols()
+        );
     }
 }

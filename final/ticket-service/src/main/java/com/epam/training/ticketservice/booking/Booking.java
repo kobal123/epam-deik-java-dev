@@ -1,6 +1,7 @@
 package com.epam.training.ticketservice.booking;
 
 import com.epam.training.ticketservice.screening.Screening;
+import com.epam.training.ticketservice.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -26,7 +27,6 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-//@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"username","screening_movie_title","screening_room_name","screening_start_time"})})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,22 +36,27 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+    @OneToOne
+    private User user;
 
     @ManyToOne
     private Screening screening;
 
+    private Long priceTotal;
+
     @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     @JoinColumn(name = "seat_id", referencedColumnName = "id")
-    private Set<Seat> seats = new HashSet<>();
+    private Set<Seat> seats;
 
-    public Booking(String username, Screening screening) {
-        this.username = username;
+    public Booking(User user, Screening screening) {
+        this.user = user;
         this.screening = screening;
     }
 
-    public void addSeat(Seat seat) {
-        this.seats.add(seat);
+    public Booking(User user, Screening screening, Set<Seat> seats) {
+        this.user = user;
+        this.screening = screening;
+        this.seats = seats;
     }
 }
 

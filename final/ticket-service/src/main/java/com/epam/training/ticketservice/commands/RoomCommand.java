@@ -1,8 +1,9 @@
 package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.room.Room;
+import com.epam.training.ticketservice.room.RoomDto;
 import com.epam.training.ticketservice.room.RoomService;
-import com.epam.training.ticketservice.user.UserDTO;
+import com.epam.training.ticketservice.user.UserDto;
 import com.epam.training.ticketservice.user.UserService;
 import com.epam.training.ticketservice.user.model.Role;
 import org.springframework.shell.Availability;
@@ -27,14 +28,14 @@ public class RoomCommand {
     @ShellMethodAvailability("isAdmin")
     @ShellMethod(value = "Create a new room", key = "create room")
     void createRoom(String name, int numOfRows, int numOfCols) {
-        Room room = new Room(name,numOfRows,numOfCols);
+        RoomDto room = new RoomDto(name,numOfRows,numOfCols);
         roomService.createRoom(room);
     }
 
     @ShellMethodAvailability("isAdmin")
     @ShellMethod(value = "Update a room", key = "update room")
     void updateRoom(String name, int numOfRows, int numOfCols) {
-        Room room = new Room(name,numOfRows,numOfCols);
+        RoomDto room = new RoomDto(name,numOfRows,numOfCols);
         roomService.updateRoom(room);
 
     }
@@ -46,7 +47,7 @@ public class RoomCommand {
 
     @ShellMethod(value = "List all rooms", key = "list rooms")
     void listRooms() {
-        List<Room> rooms = roomService.getAllRooms();
+        List<RoomDto> rooms = roomService.getAllRooms();
         if (rooms.isEmpty()) {
             System.out.println("There are no rooms at the moment");
         } else {
@@ -60,8 +61,8 @@ public class RoomCommand {
     }
 
     public Availability isAdmin() {
-        Optional<UserDTO> userDTO = userService.describe();
-        return userDTO.isPresent() && userDTO.get().hasRole(Role.ADMIN)
+        Optional<UserDto> userDTO = userService.describe();
+        return userDTO.isPresent() && userDTO.get().getRoles().contains(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }

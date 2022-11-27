@@ -1,11 +1,16 @@
 package com.epam.training.ticketservice.booking;
 
+import com.epam.training.ticketservice.screening.ScreeningDto;
+
 import java.util.List;
+import java.util.Set;
 
 public interface BookingService {
 
-    List<Booking> getBookingsByUsername(String username);
+    List<BookingDto> getBookingsByUsername(String username);
 
-    void createBooking(Booking booking);
-    List<Booking> getAllBookings();
+    BookingDto createBooking(ScreeningDto screening, Set<SeatDto> seats);
+
+
+    List<BookingDto> getAllBookings();
 }
