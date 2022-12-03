@@ -1,4 +1,4 @@
-package com.epam.training.ticketservice.booking;
+package com.epam.training.ticketservice.seat;
 
 import com.epam.training.ticketservice.screening.Screening;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,4 +1,4 @@
-package com.epam.training.ticketservice.booking;
+package com.epam.training.ticketservice.seat;
 
 import lombok.Value;
 

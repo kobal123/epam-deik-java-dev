@@ -1,4 +1,4 @@
-package com.epam.training.ticketservice.booking;
+package com.epam.training.ticketservice.seat;
 
 import com.epam.training.ticketservice.screening.Screening;
 import lombok.AllArgsConstructor;
@@ -45,15 +45,6 @@ public class Seat implements Serializable {
     public Seat(Integer seatRow, Integer seatCol) {
         this.seatRow = seatRow;
         this.seatCol = seatCol;
-    }
-
-    @Override
-    public String toString() {
-        return "Seat{"
-                + "id=" + id
-                + ", seatRow=" + seatRow
-                + ", seatCol=" + seatCol
-                + '}';
     }
 
 }

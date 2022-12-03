@@ -2,14 +2,11 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.booking.BookingDto;
 import com.epam.training.ticketservice.booking.BookingService;
-import com.epam.training.ticketservice.booking.SeatDto;
-import com.epam.training.ticketservice.booking.SeatRepository;
+import com.epam.training.ticketservice.seat.SeatDto;
+import com.epam.training.ticketservice.seat.SeatRepository;
 import com.epam.training.ticketservice.screening.ScreeningDto;
 import com.epam.training.ticketservice.user.UserDto;
 import com.epam.training.ticketservice.user.UserService;
-import com.epam.training.ticketservice.user.UserServiceImpl;
-import com.epam.training.ticketservice.user.exception.BadCredentialsException;
-import com.epam.training.ticketservice.user.exception.UserPrivilegeException;
 import com.epam.training.ticketservice.user.model.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -71,12 +68,12 @@ public class UserCommand {
 
     @ShellMethod(value = "Gives information about the currently logged in account", key = "describe account")
     public void describeAccount() {
-        Optional<UserDto> optionalUserDTO = userService.describe();
-        if (optionalUserDTO.isEmpty()) {
+        Optional<UserDto> optionalUserDto = userService.describe();
+        if (optionalUserDto.isEmpty()) {
             System.out.println("You are not signed in");
             return;
         }
-        UserDto user = optionalUserDTO.get();
+        UserDto user = optionalUserDto.get();
         Set<Role> userRoles = user.getRoles();
         if (userRoles.contains(Role.ADMIN)) {
             System.out.println(String.format("Signed in with privileged account '%s'",
@@ -102,8 +99,7 @@ public class UserCommand {
             StringJoiner joiner = new StringJoiner(", ");
             String seatFormat = "(%d,%d)";
             ScreeningDto screening = bookingDto.getScreeningDto();
-            for(SeatDto seat : bookingDto.getSeats()) {
-
+            for (SeatDto seat : bookingDto.getSeats()) {
                 joiner.add(String.format(seatFormat,seat.getSeatRow(),seat.getSeatCol()));
             }
 

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ScreeningConverter {
     public ScreeningDto toDto(Screening screening) {
-        return new ScreeningDto(screening.getMovieTitle(),
-                screening.getRoomName(),
+        return new ScreeningDto(screening.getMovie().getName(),
+                screening.getRoom().getName(),
                 screening.getStartTime()
         );
     }

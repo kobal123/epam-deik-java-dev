@@ -1,4 +1,4 @@
-package com.epam.training.ticketservice.screening;
+package com.epam.training.ticketservice.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;

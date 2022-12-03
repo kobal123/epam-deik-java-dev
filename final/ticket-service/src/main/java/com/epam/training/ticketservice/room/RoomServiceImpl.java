@@ -1,5 +1,8 @@
 package com.epam.training.ticketservice.room;
 
+import com.epam.training.ticketservice.pricecomponent.PriceComponent;
+import com.epam.training.ticketservice.pricecomponent.PriceComponentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -7,13 +10,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
+    private final PriceComponentRepository priceComponentRepository;
 
-    public RoomServiceImpl(RoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
-    }
 
 
     @Override
@@ -43,11 +45,28 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    public Optional<RoomDto> findByName(String name) {
+        Optional<Room> room = roomRepository.findByName(name);
+        return room.map(this::convertRoomToDto);
+    }
+
+    @Override
     public List<RoomDto> getAllRooms() {
         return roomRepository.findAll()
                 .stream()
                 .map(this::convertRoomToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void attachPriceComponent(String componentName, String roomName) {
+        Room room = roomRepository.findByName(roomName)
+                .orElseThrow(() -> new IllegalArgumentException("Could not find room"));
+        PriceComponent component = priceComponentRepository.findById(componentName)
+                .orElseThrow(() -> new IllegalArgumentException("Could not find price component"));
+
+        room.addPriceComponent(component);
+        roomRepository.save(room);
     }
 
     private Room updateRoomFromDto(Room room, RoomDto dto) {

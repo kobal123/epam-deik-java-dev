@@ -1,10 +1,15 @@
 package com.epam.training.ticketservice.screening;
 
+import com.epam.training.ticketservice.bookingprice.BookingPrice;
+import com.epam.training.ticketservice.bookingprice.BookingPriceRepository;
 import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.movie.MovieRepository;
+import com.epam.training.ticketservice.pricecomponent.PriceComponent;
+import com.epam.training.ticketservice.pricecomponent.PriceComponentRepository;
+import com.epam.training.ticketservice.room.Room;
+import com.epam.training.ticketservice.room.RoomRepository;
 import com.epam.training.ticketservice.screening.exception.OverlappingScreeningBreakTimeException;
 import com.epam.training.ticketservice.screening.exception.OverlappingScreeningException;
-import com.epam.training.ticketservice.screening.exception.ScreeningNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -19,7 +24,9 @@ public class ScreeningServiceImpl implements ScreeningService {
     private final ScreeningRepository screeningRepository;
     private final MovieRepository movieRepository;
     private final ScreeningConverter screeningConverter;
-
+    private final PriceComponentRepository priceComponentRepository;
+    private final RoomRepository roomRepository;
+    private final BookingPriceRepository bookingPriceRepository;
 
     @Override
     public void createScreening(ScreeningDto screening) {
@@ -33,30 +40,36 @@ public class ScreeningServiceImpl implements ScreeningService {
         }
         validateScreening(screening);
         Screening screeningToSave = screeningFromDto(screening);
-
+        BookingPrice bookingPrice = bookingPriceRepository.findById(1L).get();
+        screeningToSave.setBookingPrice(bookingPrice);
         screeningRepository.save(screeningToSave);
 
     }
 
-    public void updateScreening(ScreeningDto screening) {
-        Optional<Screening> screeningOptional = screeningRepository.findScreeningByMovieAndRoomAndStartTime(
-                screening.getMovieTitle(),
-                screening.getRoomName(),
-                screening.getStartTime()
-        );
 
-        if (screeningOptional.isEmpty()) {
-            throw new RuntimeException("Screening does not exists");
-        }
 
-        validateScreening(screening);
-        Screening screeningToSave = screeningFromDto(screening);
-        screeningRepository.save(screeningToSave);
+    @Override
+    public Optional<ScreeningDto> getScreeningByMovieAndRoomAndStartTime(String movie,
+                                                                         String room,
+                                                                         LocalDateTime start) {
+        Optional<Screening> screening = screeningRepository
+                .findScreeningByMovieAndRoomAndStartTime(movie, room, start);
+        return screening.map(screeningConverter::toDto);
     }
 
     @Override
-    public Optional<Screening> getScreeningByMovieAndRoomAndStartTime(String movie, String room, LocalDateTime start) {
-        return screeningRepository.findScreeningByMovieAndRoomAndStartTime(movie, room, start);
+    public void attachPriceComponent(String componentName, ScreeningDto screeningDto) {
+        PriceComponent component = priceComponentRepository.findById(componentName)
+                .orElseThrow(() -> new IllegalArgumentException("Could not find price component"));
+
+        Screening screening = screeningRepository.findScreeningByMovieAndRoomAndStartTime(
+                screeningDto.getMovieTitle(),
+                screeningDto.getRoomName(),
+                screeningDto.getStartTime()
+        ).orElseThrow(() -> new IllegalArgumentException("Could not find screening"));
+
+        screening.addPriceComponent(component);
+        screeningRepository.save(screening);
     }
 
 
@@ -64,7 +77,7 @@ public class ScreeningServiceImpl implements ScreeningService {
         List<Screening> screenings = screeningRepository.findAll();
         for (Screening screening : screenings) {
 
-            if (screening.getRoomName().equals(screeningToSave.getRoomName())) {
+            if (screening.getRoom().getName().equals(screeningToSave.getRoomName())) {
                 checkScreeningDateCollision(screening,screeningToSave);
             }
         }
@@ -72,7 +85,7 @@ public class ScreeningServiceImpl implements ScreeningService {
     }
 
     private void checkScreeningDateCollision(Screening firstScreening, ScreeningDto secondScreening) {
-        Movie firstMovie = movieRepository.findByName(firstScreening.getMovieTitle()).get();
+        Movie firstMovie = firstScreening.getMovie();
         Movie secondMovie = movieRepository.findByName(secondScreening.getMovieTitle()).get();
         LocalDateTime firstStart = firstScreening.getStartTime();
         LocalDateTime secondStart = secondScreening.getStartTime();
@@ -123,16 +136,15 @@ public class ScreeningServiceImpl implements ScreeningService {
     }
 
     private Screening screeningFromDto(ScreeningDto dto) {
+        Movie movie = movieRepository.findByName(dto.getMovieTitle())
+                .orElseThrow(() -> new IllegalArgumentException("No such movie"));
+        Room room = roomRepository.findByName(dto.getRoomName())
+                .orElseThrow(() -> new IllegalArgumentException("no such room"));
         return new Screening(
-                dto.getMovieTitle(),
-                dto.getRoomName(),
+                movie,
+                room,
                 dto.getStartTime()
         );
     }
 
-    private void updateScreeningFromDto(Screening screening, ScreeningDto dto) {
-        screening.setStartTime(dto.getStartTime());
-        screening.setMovieTitle(dto.getMovieTitle());
-        screening.setRoomName(dto.getRoomName());
-    }
 }

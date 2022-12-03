@@ -39,6 +39,7 @@ public class RoomCommand {
         roomService.updateRoom(room);
 
     }
+
     @ShellMethodAvailability("isAdmin")
     @ShellMethod(value = "Delete a room", key = "delete room")
     void deleteRoom(String name) {
@@ -61,8 +62,8 @@ public class RoomCommand {
     }
 
     public Availability isAdmin() {
-        Optional<UserDto> userDTO = userService.describe();
-        return userDTO.isPresent() && userDTO.get().getRoles().contains(Role.ADMIN)
+        Optional<UserDto> userDto = userService.describe();
+        return userDto.isPresent() && userDto.get().getRoles().contains(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }

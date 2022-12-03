@@ -16,17 +16,6 @@ public class UserServiceImpl implements UserService {
 
     private UserDto loggedInUser = null;
 
-/*
-    public Optional<UserDto> loginPrivileged(String userName, String password) {
-        Optional<User> user = userRepository.findByNameAndPassword(userName, password);
-
-        if (user.isEmpty() || !user.get().getRoles().contains(Role.ADMIN)) {
-            return Optional.empty();
-        }
-        loggedInUser = Optional.of(convertToDTO(user.get()));
-        return loggedInUser;
-    }*/
-
 
     @Override
     public Optional<UserDto> login(String username, String password) {
@@ -34,7 +23,7 @@ public class UserServiceImpl implements UserService {
         if (user.isEmpty()) {
             return Optional.empty();
         }
-        loggedInUser = convertToDTO(user.get());
+        loggedInUser = convertToDto(user.get());
         return describe();
     }
 
@@ -56,7 +45,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    private UserDto convertToDTO(User user){
+    private UserDto convertToDto(User user) {
         return new UserDto(user.getName(), user.getRoles());
     }
 

@@ -1,5 +1,8 @@
 package com.epam.training.ticketservice.movie;
 
+import com.epam.training.ticketservice.pricecomponent.PriceComponent;
+import com.epam.training.ticketservice.pricecomponent.PriceComponentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -7,13 +10,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class MovieServiceImpl implements MovieService {
 
     private final MovieRepository movieRepository;
-
-    public MovieServiceImpl(MovieRepository movieRepository) {
-        this.movieRepository = movieRepository;
-    }
+    private final PriceComponentRepository priceComponentRepository;
 
 
     @Override
@@ -27,28 +28,37 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public void deleteMovieByName(String name) {
-        Movie movie = movieRepository.findByName(name).orElseThrow(() -> new IllegalArgumentException(
-                String.format("Deleting movie %s failed, movie does not exists", name)));
-
-        movieRepository.deleteById(movie.getId());
+        movieRepository.deleteByName(name);
     }
 
     @Override
     public void createMovie(MovieDto movie) {
+
         Movie movieToSave = movieFromDto(movie);
         movieRepository.save(movieToSave);
     }
 
     @Override
     public Optional<MovieDto> getMovieByName(String name) {
-        Movie movie = movieRepository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Could not find movie!"));
-        MovieDto dto = convertToDto(movie);
-        return Optional.of(dto);
+        Optional<Movie> movie = movieRepository.findByName(name);
+        return movie.map(this::convertToDto);
     }
 
     @Override
     public List<MovieDto> getAllMovies() {
         return movieRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public void attachPriceComponent(String componentName, String movieName) {
+        Movie movie = movieRepository.findByName(movieName)
+                .orElseThrow(() -> new IllegalArgumentException("No such movie"));
+
+        PriceComponent component = priceComponentRepository.findById(componentName)
+                .orElseThrow(() -> new IllegalArgumentException("No such price component"));
+
+        movie.addPriceComponent(component);
+        movieRepository.save(movie);
     }
 
     private void updateMovieWithMovieDto(Movie movie,MovieDto dto) {
@@ -60,6 +70,7 @@ public class MovieServiceImpl implements MovieService {
     private Movie movieFromDto(MovieDto dto) {
         return new Movie(dto.getName(), dto.getGenre(), dto.getScreenTime());
     }
+    
     private MovieDto convertToDto(Movie movie) {
         return new MovieDto(movie.getName(), movie.getGenre(), movie.getScreenTime());
     }

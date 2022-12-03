@@ -62,9 +62,9 @@ public class MovieCommand {
 
     @ShellMethodAvailability({"deleteMovie","updateMovie","createMovie"})
     public Availability isAdmin() {
-        Optional<UserDto> userDTO = userService.describe();
+        Optional<UserDto> userDto = userService.describe();
 
-        return userDTO.isPresent() && userDTO.get().getRoles().contains(Role.ADMIN)
+        return userDto.isPresent() && userDto.get().getRoles().contains(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }

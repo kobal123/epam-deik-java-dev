@@ -14,4 +14,7 @@ public interface MovieService {
     Optional<MovieDto> getMovieByName(String name);
 
     List<MovieDto> getAllMovies();
+
+    void attachPriceComponent(String componentName, String movie);
+
 }

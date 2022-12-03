@@ -76,12 +76,6 @@ public class ScreeningsCommand {
         }
     }
 
-    @ShellMethodAvailability("isAdmin")
-    @ShellMethod(value = "Update a screening", key = "update screening")
-    void updateScreening(String movieTitle, String roomName, String startTime) {
-        ScreeningDto screeningDto = screeningDtoFromData(movieTitle, roomName, startTime);
-        screeningService.updateScreening(screeningDto);
-    }
 
     @ShellMethodAvailability("isAdmin")
     @ShellMethod(value = "Delete a screening", key = "delete screening")
@@ -91,15 +85,15 @@ public class ScreeningsCommand {
     }
 
     public Availability isAdmin() {
-        Optional<UserDto> userDTO = userService.describe();
-        return userDTO.isPresent() && userDTO.get().getRoles().contains(Role.ADMIN)
+        Optional<UserDto> userDto = userService.describe();
+        return userDto.isPresent() && userDto.get().getRoles().contains(Role.ADMIN)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }
 
     public Availability isUser() {
-        Optional<UserDto> userDTO = userService.describe();
-        return userDTO.isPresent() && userDTO.get().getRoles().contains(Role.USER)
+        Optional<UserDto> userDto = userService.describe();
+        return userDto.isPresent() && userDto.get().getRoles().contains(Role.USER)
                 ? Availability.available()
                 : Availability.unavailable("User is not an admin");
     }

@@ -15,8 +15,8 @@ public interface ScreeningService {
 
     List<ScreeningDto> getAllScreenings();
 
-    void updateScreening(ScreeningDto screening);
+    Optional<ScreeningDto> getScreeningByMovieAndRoomAndStartTime(String movie, String room, LocalDateTime start);
 
-    Optional<Screening> getScreeningByMovieAndRoomAndStartTime(String movie, String room, LocalDateTime start);
+    void attachPriceComponent(String componentName, ScreeningDto screening);
 
 }

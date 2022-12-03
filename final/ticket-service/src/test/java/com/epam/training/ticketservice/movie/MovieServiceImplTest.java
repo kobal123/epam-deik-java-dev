@@ -1,5 +1,10 @@
 package com.epam.training.ticketservice.movie;
 
+import com.epam.training.ticketservice.pricecomponent.PriceComponent;
+import com.epam.training.ticketservice.pricecomponent.PriceComponentRepository;
+import com.epam.training.ticketservice.room.Room;
+import com.epam.training.ticketservice.screening.Screening;
+import com.epam.training.ticketservice.screening.ScreeningDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -7,16 +12,21 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MovieServiceImplTest {
 
     @Mock
     private MovieRepository movieRepository;
+
+    @Mock
+    private PriceComponentRepository priceComponentRepository;
 
     @InjectMocks
     private MovieServiceImpl underTest;
@@ -56,18 +66,90 @@ class MovieServiceImplTest {
                 () -> underTest.updateMovie(movie));
     }
 
+
     @Test
-    void testDeleteMovieByIdShouldThrowMovieNotFoundExceptionWhenMovieDoesNotExists() {
+    void testUpdateMovieShouldCallRepositoryWhenInputIsValid() {
         // given
         String movieName = "name";
-        MovieDto movie = new MovieDto(movieName,"drama",123);
+        MovieDto movieDto = new MovieDto(movieName,"action",123);
+        Movie movie = new Movie(movieName,"drama",123);
+        Movie movieAfterUpdate = new Movie(movieName,"action",123);
+
+        Mockito.when(movieRepository.findByName(movieName)).thenReturn(Optional.of(movie));
+
+        // when
+        underTest.updateMovie(movieDto);
+        // then
+        Mockito.verify(movieRepository).findByName(movieName);
+        Mockito.verify(movieRepository).save(movieAfterUpdate);
+
+    }
+
+
+    @Test
+    void testDeleteMovieByNameShouldCallRepository() {
+        // given
+        Movie movie = new Movie("name","genre", 135);
+
+        // when
+        underTest.deleteMovieByName(movie.getName());
+
+        // then
+        Mockito.verify(movieRepository).deleteByName(movie.getName());
+    }
+
+
+    @Test
+    void testGetMovieByNameShouldReturnOptionalEmptyWhenMovieDoesNotExist() {
+        // given
+        String movieName = "movie";
         Mockito.when(movieRepository.findByName(movieName)).thenReturn(Optional.empty());
 
         // when
-        // then
+        Optional<MovieDto> result = underTest.getMovieByName(movieName);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> underTest.deleteMovieByName(movieName));
+        // then
+        assertTrue(result.isEmpty());
+        Mockito.verify(movieRepository).findByName(movieName);
     }
 
+
+    @Test
+    void testGetMovieByNameShouldReturnCorrectValueWhenInputIsValid() {
+        // given
+
+        Movie movie = new Movie("name", "genre", 135);
+        MovieDto expected = new MovieDto("name", "genre", 135);
+
+        Mockito.when(movieRepository.findByName(movie.getName())).thenReturn(Optional.of(movie));
+
+        // when
+        Optional<MovieDto> actual = underTest.getMovieByName(movie.getName());
+
+        // then
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
+        Mockito.verify(movieRepository).findByName(movie.getName());
+    }
+
+    @Test
+    void testAttachPriceComponentShouldCallRepositoryWhenInputIsValid() {
+        // given
+        Movie movie = new Movie("Movie", "drama", 120);
+
+        PriceComponent priceComponent = new PriceComponent("component", 1500);
+        Mockito.when(priceComponentRepository.findById(priceComponent.getName()))
+                .thenReturn(Optional.of(priceComponent));
+        Mockito.when(movieRepository.findByName(movie.getName()))
+                .thenReturn(Optional.of(movie));
+
+
+        //when
+        underTest.attachPriceComponent(priceComponent.getName(), movie.getName());
+        //then
+        Mockito.verify(movieRepository).findByName(movie.getName());
+        Mockito.verify(movieRepository)
+                .save(movie);
+        assertTrue(movie.getPriceComponents().contains(priceComponent));
+    }
 }

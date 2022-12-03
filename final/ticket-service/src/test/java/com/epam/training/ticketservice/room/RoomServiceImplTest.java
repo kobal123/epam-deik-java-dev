@@ -50,7 +50,54 @@ class RoomServiceImplTest {
         // then
         assertThrows(IllegalArgumentException.class,
                 () -> underTest.createRoom(roomDto));
+        Mockito.verify(roomRepository).findByName("room");
     }
+
+    @Test
+    void testUpdateRoomShouldThrowIllegalArgumentExceptionWhenRoomDoesNotExists() {
+        // given
+        RoomDto roomDto = new RoomDto("room", 10, 10);
+        Mockito.when(roomRepository.findByName("room")).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThrows(IllegalArgumentException.class,
+                () -> underTest.updateRoom(roomDto));
+        Mockito.verify(roomRepository).findByName("room");
+    }
+
+    @Test
+    void testCreateRoomShouldCallRoomRepositoryWhenInputIsValid() {
+        // given
+
+        RoomDto roomDto = new RoomDto("room", 10, 10);
+        Mockito.when(roomRepository.findByName("room")).thenReturn(Optional.empty());
+
+        // when
+        underTest.createRoom(roomDto);
+        // then
+
+        Mockito.verify(roomRepository).findByName("room");
+        Mockito.verify(roomRepository).save(new Room("room", 10, 10));
+
+    }
+
+    @Test
+    void testUpdateRoomShouldCallRoomRepositoryWhenInputIsValid() {
+        // given
+        Room room = new Room();
+        RoomDto roomDto = new RoomDto("room", 10, 10);
+        Mockito.when(roomRepository.findByName("room")).thenReturn(Optional.of(room));
+
+        // when
+        underTest.updateRoom(roomDto);
+        // then
+
+        Mockito.verify(roomRepository).findByName("room");
+        Mockito.verify(roomRepository).save(new Room("room", 10, 10));
+
+    }
+
 
     @Test
     void getAllRooms() {

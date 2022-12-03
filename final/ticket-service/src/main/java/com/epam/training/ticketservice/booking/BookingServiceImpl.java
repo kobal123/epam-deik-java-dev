@@ -1,10 +1,15 @@
 package com.epam.training.ticketservice.booking;
 
+import com.epam.training.ticketservice.movie.Movie;
+import com.epam.training.ticketservice.pricecomponent.PriceComponent;
+import com.epam.training.ticketservice.room.Room;
 import com.epam.training.ticketservice.screening.Screening;
 import com.epam.training.ticketservice.screening.ScreeningConverter;
 import com.epam.training.ticketservice.screening.ScreeningDto;
+import com.epam.training.ticketservice.screening.ScreeningRepository;
 import com.epam.training.ticketservice.screening.ScreeningService;
-import com.epam.training.ticketservice.screening.exception.ScreeningNotFoundException;
+import com.epam.training.ticketservice.seat.Seat;
+import com.epam.training.ticketservice.seat.SeatDto;
 import com.epam.training.ticketservice.user.UserDto;
 import com.epam.training.ticketservice.user.UserRepository;
 import com.epam.training.ticketservice.user.UserService;
@@ -27,6 +32,7 @@ public class BookingServiceImpl implements BookingService {
     private UserService userService;
     private UserRepository userRepository;
     private ScreeningService screeningService;
+    private ScreeningRepository screeningRepository;
     private final DateTimeFormatter formatter;
     private final ScreeningConverter screeningConverter;
 
@@ -43,7 +49,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingDto createBooking(ScreeningDto screening, Set<SeatDto> seats) {
 
-        Optional<Screening> screeningOptional = screeningService.getScreeningByMovieAndRoomAndStartTime(
+        Optional<Screening> screeningOptional = screeningRepository.findScreeningByMovieAndRoomAndStartTime(
                 screening.getMovieTitle(),
                 screening.getRoomName(),
                 screening.getStartTime());
@@ -52,20 +58,21 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException("Screening was not found!");
         } else {
             UserDto userDto = userService.describe().get();
-            User user = userRepository.findByName(userDto.getName()).orElseThrow(
-                    () -> new IllegalArgumentException("No such username!"));
-            Booking booking = new Booking();
+            User user = userRepository.findByName(userDto.getName())
+                    .orElseThrow(() -> new IllegalArgumentException("No such username!"));
+
             Screening screeningToUpdate = screeningOptional.get();
             Set<Seat> bookingSeats = seats.stream().map(this::convertSeatDtoToEntity).collect(Collectors.toSet());
+            Booking booking = new Booking();
             booking.setUser(user);
             booking.setScreening(screeningToUpdate);
             booking.setSeats(bookingSeats);
-            Long totalPrice = 0L;
+            Long totalPrice = calculateTotalPrice(bookingSeats, screeningToUpdate);
 
-            for (Seat seat : booking.getSeats()) {
+            for (Seat seat : bookingSeats) {
                 seat.setScreening(screeningToUpdate);
-                totalPrice += screeningToUpdate.getTicketPrice();
             }
+
             booking.setPriceTotal(totalPrice);
             screeningToUpdate.addBooking(booking);
             //screeningService.updateScreening(screeningToUpdate);
@@ -83,6 +90,25 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Long preCheckBookingPrice(ScreeningDto screening, Set<SeatDto> seats) {
+
+        Optional<Screening> screeningOptional = screeningRepository.findScreeningByMovieAndRoomAndStartTime(
+                screening.getMovieTitle(),
+                screening.getRoomName(),
+                screening.getStartTime());
+
+        if (screeningOptional.isEmpty()) {
+            throw new IllegalArgumentException("Screening was not found!");
+        } else {
+
+            Screening screeningToUpdate = screeningOptional.get();
+            Set<Seat> bookingSeats = seats.stream().map(this::convertSeatDtoToEntity).collect(Collectors.toSet());
+
+            return calculateTotalPrice(bookingSeats, screeningToUpdate);
+        }
+    }
+
     private BookingDto convertBookingToDto(Booking booking) {
         Set<SeatDto> seats = booking.getSeats()
                 .stream()
@@ -93,12 +119,22 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
-    private SeatDto convertSeatDtoToEntity(Seat seat){
+    private SeatDto convertSeatDtoToEntity(Seat seat) {
         return new SeatDto(seat.getSeatRow(), seat.getSeatCol());
     }
 
-    private Seat convertSeatDtoToEntity(SeatDto seat){
+    private Seat convertSeatDtoToEntity(SeatDto seat) {
         return new Seat(seat.getSeatRow(), seat.getSeatCol());
     }
 
+    private Long calculateTotalPrice(Set<Seat> seats, Screening screening) {
+        Movie movie = screening.getMovie();
+        Room room = screening.getRoom();
+        Long moviePriceTotal = movie.getPriceComponents().stream().mapToLong(PriceComponent::getPrice).sum();
+        Long roomPriceTotal = room.getPriceComponents().stream().mapToLong(PriceComponent::getPrice).sum();
+        Long screeningPriceTotal = screening.getPriceComponents().stream().mapToLong(PriceComponent::getPrice).sum();
+        Long ticketPrice = screening.getTicketPrice();
+
+        return seats.size() * (moviePriceTotal + roomPriceTotal + screeningPriceTotal + ticketPrice);
+    }
 }

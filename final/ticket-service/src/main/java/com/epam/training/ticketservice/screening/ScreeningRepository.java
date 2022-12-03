@@ -12,8 +12,8 @@ import java.util.Optional;
 @Repository
 public interface ScreeningRepository extends JpaRepository<Screening,Long> {
 
-    @Query("SELECT s FROM Screening s " +
-            "WHERE s.roomName=:roomName and s.movieTitle=:movieName and s.startTime=:startTime")
+    @Query("SELECT s FROM Screening s "
+            + "WHERE s.room.name=:roomName and s.movie.name=:movieName and s.startTime=:startTime")
     Optional<Screening> findScreeningByMovieAndRoomAndStartTime(@Param("movieName") String movie,
                                                                 @Param("roomName") String room,
                                                                 @Param("startTime") LocalDateTime start);

@@ -1,8 +1,8 @@
-package com.epam.training.ticketservice.booking;
+package com.epam.training.ticketservice.seat;
 
 import com.epam.training.ticketservice.screening.Screening;
 import com.epam.training.ticketservice.screening.ScreeningDto;
-import com.epam.training.ticketservice.screening.ScreeningService;
+import com.epam.training.ticketservice.screening.ScreeningRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,14 +11,17 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SeatService {
+public class SeatServiceImpl implements SeatService{
     private final SeatRepository seatRepository;
-    private final ScreeningService screeningService;
+
+    private final ScreeningRepository screeningRepository;
 
     public List<SeatDto> getSeatsForScreening(ScreeningDto screeningDto) {
-        Screening screening = screeningService.getScreeningByMovieAndRoomAndStartTime(screeningDto.getMovieTitle(),
+        Screening screening = screeningRepository.findScreeningByMovieAndRoomAndStartTime(screeningDto.getMovieTitle(),
                 screeningDto.getRoomName(),
-                screeningDto.getStartTime()).orElseThrow(() -> new IllegalArgumentException("Screening does not exists"));
+                screeningDto.getStartTime())
+                .orElseThrow(() -> new IllegalArgumentException("Screening does not exists"));
+
         return seatRepository.findSeatsByScreening(screening)
                 .stream()
                 .map(this::convertSeatToDto).collect(Collectors.toList());
