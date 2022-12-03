@@ -2,6 +2,7 @@ package com.epam.training.ticketservice.room;
 
 import com.epam.training.ticketservice.pricecomponent.PriceComponent;
 import com.epam.training.ticketservice.pricecomponent.PriceComponentRepository;
+import com.epam.training.ticketservice.seat.SeatDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,21 @@ public class RoomServiceImpl implements RoomService {
                 .stream()
                 .map(this::convertRoomToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<SeatDto> checkSeatsExistForRoom(String roomName, List<SeatDto> seats) {
+        Room room = roomRepository.findByName(roomName)
+                .orElseThrow(() -> new IllegalArgumentException("Room does not exist"));
+
+        for (SeatDto seat : seats) {
+            boolean rowCheck = (seat.getSeatRow() >= 1) && (seat.getSeatRow() <= room.getSeatRows());
+            boolean colCheck = (seat.getSeatCol() >= 1) && (seat.getSeatCol() <= room.getSeatCols());
+            if (!rowCheck || !colCheck) {
+                return Optional.of(seat);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override

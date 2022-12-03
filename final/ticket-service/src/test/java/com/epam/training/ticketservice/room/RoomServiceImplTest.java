@@ -3,6 +3,7 @@ package com.epam.training.ticketservice.room;
 import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.pricecomponent.PriceComponent;
 import com.epam.training.ticketservice.pricecomponent.PriceComponentRepository;
+import com.epam.training.ticketservice.seat.SeatDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,6 +28,9 @@ class RoomServiceImplTest {
     @InjectMocks
     private RoomServiceImpl underTest;
 
+    private static final Room ROOM = new Room("room", 10, 10);
+    private static final RoomDto ROOM_DTO = new RoomDto("room", 10, 10);
+
     @Test
     void testGetAllRooms() {
     }
@@ -37,53 +42,49 @@ class RoomServiceImplTest {
     @Test
     void testDeleteRoomByNameShouldThrowIllegalArgumentExceptionWhenRoomDoesNotExists() {
         // given
-        Mockito.when(roomRepository.findByName("room")).thenReturn(Optional.empty());
+        Mockito.when(roomRepository.findByName(ROOM.getName())).thenReturn(Optional.empty());
 
         // when
         // then
         assertThrows(IllegalArgumentException.class,
-                () -> underTest.deleteRoomByName("room"));
+                () -> underTest.deleteRoomByName(ROOM.getName()));
     }
 
     @Test
     void testCreateRoomShouldThrowIllegalArgumentExceptionWhenRoomAlreadyExists() {
         // given
-        Room room = new Room();
-        RoomDto roomDto = new RoomDto("room", 10, 10);
-        Mockito.when(roomRepository.findByName("room")).thenReturn(Optional.of(room));
+        Mockito.when(roomRepository.findByName(ROOM.getName())).thenReturn(Optional.of(ROOM));
 
         // when
         // then
         assertThrows(IllegalArgumentException.class,
-                () -> underTest.createRoom(roomDto));
-        Mockito.verify(roomRepository).findByName("room");
+                () -> underTest.createRoom(ROOM_DTO));
+        Mockito.verify(roomRepository).findByName(ROOM.getName());
     }
 
     @Test
     void testUpdateRoomShouldThrowIllegalArgumentExceptionWhenRoomDoesNotExists() {
         // given
-        RoomDto roomDto = new RoomDto("room", 10, 10);
-        Mockito.when(roomRepository.findByName("room")).thenReturn(Optional.empty());
+        Mockito.when(roomRepository.findByName(ROOM.getName())).thenReturn(Optional.empty());
 
         // when
         // then
         assertThrows(IllegalArgumentException.class,
-                () -> underTest.updateRoom(roomDto));
-        Mockito.verify(roomRepository).findByName("room");
+                () -> underTest.updateRoom(ROOM_DTO));
+        Mockito.verify(roomRepository).findByName(ROOM.getName());
     }
 
     @Test
     void testCreateRoomShouldCallRoomRepositoryWhenInputIsValid() {
         // given
 
-        RoomDto roomDto = new RoomDto("room", 10, 10);
-        Mockito.when(roomRepository.findByName("room")).thenReturn(Optional.empty());
+        Mockito.when(roomRepository.findByName(ROOM_DTO.getName())).thenReturn(Optional.empty());
 
         // when
-        underTest.createRoom(roomDto);
+        underTest.createRoom(ROOM_DTO);
         // then
 
-        Mockito.verify(roomRepository).findByName("room");
+        Mockito.verify(roomRepository).findByName(ROOM_DTO.getName());
         Mockito.verify(roomRepository).save(new Room("room", 10, 10));
 
     }
@@ -91,15 +92,13 @@ class RoomServiceImplTest {
     @Test
     void testUpdateRoomShouldCallRoomRepositoryWhenInputIsValid() {
         // given
-        Room room = new Room();
-        RoomDto roomDto = new RoomDto("room", 10, 10);
-        Mockito.when(roomRepository.findByName("room")).thenReturn(Optional.of(room));
+        Mockito.when(roomRepository.findByName(ROOM.getName())).thenReturn(Optional.of(ROOM));
 
         // when
-        underTest.updateRoom(roomDto);
+        underTest.updateRoom(ROOM_DTO);
         // then
 
-        Mockito.verify(roomRepository).findByName("room");
+        Mockito.verify(roomRepository).findByName(ROOM_DTO.getName());
         Mockito.verify(roomRepository).save(new Room("room", 10, 10));
 
     }
@@ -124,4 +123,108 @@ class RoomServiceImplTest {
                 .save(room);
         assertTrue(room.getPriceComponents().contains(priceComponent));
     }
+
+    @Test
+    void checkSeatsExistForRoomShouldThrowIllegalArgumentExceptionWhenRoomDoesNotExist() {
+        //given
+        String roomName = "room";
+        List<SeatDto> seats = List.of(
+                new SeatDto(1,1),
+                new SeatDto(2,1),
+                new SeatDto(3,3)
+        );
+        Mockito.when(roomRepository.findByName(roomName)).thenReturn(Optional.empty());
+
+
+        //when
+        //then
+        assertThrows(IllegalArgumentException.class,
+                () -> underTest.checkSeatsExistForRoom(roomName, seats));
+    }
+
+    @Test
+    void checkSeatsExistForRoomShouldReturnSeatDtoWhenRowDoesNotExist() {
+        //given
+        String roomName = "room";
+        SeatDto expected = new SeatDto(-1,3);
+        List<SeatDto> seats = List.of(
+                new SeatDto(1,1),
+                new SeatDto(2,1),
+                expected
+        );
+        Mockito.when(roomRepository.findByName(roomName)).thenReturn(Optional.of(ROOM));
+
+
+        //when
+        Optional<SeatDto> actual = underTest.checkSeatsExistForRoom(roomName, seats);
+
+        //then
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
+    }
+
+    @Test
+    void checkSeatsExistForRoomShouldReturnSeatDtoWhenColumnDoesNotExist() {
+        //given
+        String roomName = "room";
+        SeatDto expected = new SeatDto(1,-3);
+        List<SeatDto> seats = List.of(
+                new SeatDto(1,1),
+                expected,
+                new SeatDto(2,1)
+        );
+        Mockito.when(roomRepository.findByName(roomName)).thenReturn(Optional.of(ROOM));
+
+
+        //when
+        Optional<SeatDto> actual = underTest.checkSeatsExistForRoom(roomName, seats);
+
+        //then
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
+    }
+
+
+    @Test
+    void checkSeatsExistForRoomShouldReturnSeatDtoWhenColumnAndRowDoesNotExist() {
+        //given
+        String roomName = "room";
+        SeatDto expected = new SeatDto(-1,-3);
+        List<SeatDto> seats = List.of(
+                new SeatDto(1,1),
+                expected,
+                new SeatDto(2,1)
+        );
+        Mockito.when(roomRepository.findByName(roomName)).thenReturn(Optional.of(ROOM));
+
+        //when
+        Optional<SeatDto> actual = underTest.checkSeatsExistForRoom(roomName, seats);
+
+        //then
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
+    }
+
+    @Test
+    void checkSeatsExistForRoomShouldReturnOptionalEmpty() {
+        //given
+        String roomName = "room";
+        Optional<SeatDto> expected = Optional.empty();
+        List<SeatDto> seats = List.of(
+                new SeatDto(1,1),
+                new SeatDto(2,1)
+        );
+        Mockito.when(roomRepository.findByName(roomName)).thenReturn(Optional.of(ROOM));
+
+
+        //when
+        Optional<SeatDto> actual = underTest.checkSeatsExistForRoom(roomName, seats);
+
+        //then
+        assertTrue(actual.isEmpty());
+        assertEquals(expected, actual);
+    }
+
+
+
 }

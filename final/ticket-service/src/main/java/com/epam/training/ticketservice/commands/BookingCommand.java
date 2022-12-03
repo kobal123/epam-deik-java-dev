@@ -2,7 +2,9 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.booking.BookingDto;
 import com.epam.training.ticketservice.booking.BookingService;
+import com.epam.training.ticketservice.room.RoomService;
 import com.epam.training.ticketservice.seat.SeatDto;
+import com.epam.training.ticketservice.seat.SeatService;
 import com.epam.training.ticketservice.seat.SeatServiceImpl;
 import com.epam.training.ticketservice.bookingprice.BookingPriceService;
 import com.epam.training.ticketservice.screening.ScreeningDto;
@@ -29,10 +31,12 @@ public class BookingCommand {
     private final BookingService bookingService;
     private final DateTimeFormatter dateTimeFormatter;
     private final UserService userService;
-    private final SeatServiceImpl seatServiceImpl;
+    private final SeatService seatServiceImpl;
     private final BookingPriceService bookingPriceService;
+    private final RoomService roomService;
     private final String bookingMessageFormat = "Seats booked: %s; the price for this booking is %d HUF";
     private final String priceCheckMessageFormat = "The price for this booking would be %d HUF";
+    private final String missingSeatFormat = "Seat (%d,%d) does not exist in this room";
 
     private final String seatFormat = "(%d,%d)";
 
@@ -45,7 +49,16 @@ public class BookingCommand {
                 roomName,
                 LocalDateTime.parse(startTime, dateTimeFormatter)
         );
+
         List<SeatDto> setOfSeats = parseSeats(seats);
+        Optional<SeatDto> possibleMissingSeat = roomService.checkSeatsExistForRoom(roomName, setOfSeats);
+
+        if (possibleMissingSeat.isPresent()) {
+            SeatDto missingSeat = possibleMissingSeat.get();
+            System.out.println(String.format(missingSeatFormat, missingSeat.getSeatRow(), missingSeat.getSeatCol()));
+            return;
+        }
+
         List<SeatDto> alreadyBookedSeats = seatServiceImpl.getSeatsForScreening(screening);
 
         for (SeatDto seat : setOfSeats) {
@@ -75,6 +88,13 @@ public class BookingCommand {
                 LocalDateTime.parse(startTime, dateTimeFormatter)
         );
         List<SeatDto> setOfSeats = parseSeats(seats);
+        Optional<SeatDto> possibleMissingSeat = roomService.checkSeatsExistForRoom(roomName, setOfSeats);
+
+        if (possibleMissingSeat.isPresent()) {
+            SeatDto missingSeat = possibleMissingSeat.get();
+            System.out.println(String.format(missingSeatFormat, missingSeat.getSeatRow(), missingSeat.getSeatCol()));
+            return;
+        }
 
         Long totalPrice = bookingService.preCheckBookingPrice(screening, new HashSet<>(setOfSeats));
 

@@ -3,6 +3,8 @@ package com.epam.training.ticketservice.booking;
 import com.epam.training.ticketservice.movie.Movie;
 import com.epam.training.ticketservice.pricecomponent.PriceComponent;
 import com.epam.training.ticketservice.room.Room;
+import com.epam.training.ticketservice.room.RoomDto;
+import com.epam.training.ticketservice.room.RoomService;
 import com.epam.training.ticketservice.screening.Screening;
 import com.epam.training.ticketservice.screening.ScreeningConverter;
 import com.epam.training.ticketservice.screening.ScreeningDto;
@@ -32,6 +34,7 @@ public class BookingServiceImpl implements BookingService {
     private UserService userService;
     private UserRepository userRepository;
     private ScreeningService screeningService;
+    private RoomService roomService;
     private ScreeningRepository screeningRepository;
     private final DateTimeFormatter formatter;
     private final ScreeningConverter screeningConverter;
@@ -75,8 +78,6 @@ public class BookingServiceImpl implements BookingService {
 
             booking.setPriceTotal(totalPrice);
             screeningToUpdate.addBooking(booking);
-            //screeningService.updateScreening(screeningToUpdate);
-            //bookingRepository.save(booking);
             return convertBookingToDto(booking);
         }
     }
