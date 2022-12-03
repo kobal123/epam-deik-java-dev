@@ -28,7 +28,8 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public void deleteMovieByName(String name) {
-        movieRepository.deleteByName(name);
+        Optional<Movie> movie = movieRepository.findByName(name);
+        movie.ifPresent(value -> movieRepository.deleteById(value.getId()));
     }
 
     @Override

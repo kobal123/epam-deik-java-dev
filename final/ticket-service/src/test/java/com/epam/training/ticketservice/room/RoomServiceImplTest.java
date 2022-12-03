@@ -1,5 +1,8 @@
 package com.epam.training.ticketservice.room;
 
+import com.epam.training.ticketservice.movie.Movie;
+import com.epam.training.ticketservice.pricecomponent.PriceComponent;
+import com.epam.training.ticketservice.pricecomponent.PriceComponentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +19,9 @@ class RoomServiceImplTest {
 
     @Mock
     private RoomRepository roomRepository;
+
+    @Mock
+    private PriceComponentRepository priceComponentRepository;
 
     @InjectMocks
     private RoomServiceImpl underTest;
@@ -100,6 +106,22 @@ class RoomServiceImplTest {
 
 
     @Test
-    void getAllRooms() {
+    void testAttachPriceComponentShouldCallRepositoryWhenInputIsValid() {
+        // given
+        Room room = new Room("name", 10, 10);
+        PriceComponent priceComponent = new PriceComponent("component", 1500);
+        Mockito.when(priceComponentRepository.findById(priceComponent.getName()))
+                .thenReturn(Optional.of(priceComponent));
+        Mockito.when(roomRepository.findByName(room.getName()))
+                .thenReturn(Optional.of(room));
+
+
+        //when
+        underTest.attachPriceComponent(priceComponent.getName(), room.getName());
+        //then
+        Mockito.verify(roomRepository).findByName(room.getName());
+        Mockito.verify(roomRepository)
+                .save(room);
+        assertTrue(room.getPriceComponents().contains(priceComponent));
     }
 }

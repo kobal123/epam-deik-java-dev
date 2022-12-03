@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SeatServiceImpl implements SeatService{
+public class SeatServiceImpl implements SeatService {
     private final SeatRepository seatRepository;
 
     private final ScreeningRepository screeningRepository;

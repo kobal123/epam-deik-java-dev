@@ -2,9 +2,6 @@ package com.epam.training.ticketservice.movie;
 
 import com.epam.training.ticketservice.pricecomponent.PriceComponent;
 import com.epam.training.ticketservice.pricecomponent.PriceComponentRepository;
-import com.epam.training.ticketservice.room.Room;
-import com.epam.training.ticketservice.screening.Screening;
-import com.epam.training.ticketservice.screening.ScreeningDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,12 +9,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MovieServiceImplTest {
@@ -90,12 +85,13 @@ class MovieServiceImplTest {
     void testDeleteMovieByNameShouldCallRepository() {
         // given
         Movie movie = new Movie("name","genre", 135);
-
+        Mockito.when(movieRepository.findByName(movie.getName())).thenReturn(Optional.of(movie));
         // when
         underTest.deleteMovieByName(movie.getName());
 
         // then
-        Mockito.verify(movieRepository).deleteByName(movie.getName());
+        Mockito.verify(movieRepository).findByName(movie.getName());
+        Mockito.verify(movieRepository).deleteById(movie.getId());
     }
 
 

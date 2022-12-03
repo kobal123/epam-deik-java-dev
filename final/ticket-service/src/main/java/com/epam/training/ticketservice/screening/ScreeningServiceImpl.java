@@ -122,10 +122,7 @@ public class ScreeningServiceImpl implements ScreeningService {
                         screeningDto.getStartTime()
                 );
 
-        if (screeningOptional.isEmpty()) {
-            throw new IllegalArgumentException("Failed to delete screening, screening does not exists");
-        }
-        screeningRepository.deleteById(screeningOptional.get().getId());
+        screeningOptional.ifPresent(screening -> screeningRepository.deleteById(screening.getId()));
     }
 
     @Override

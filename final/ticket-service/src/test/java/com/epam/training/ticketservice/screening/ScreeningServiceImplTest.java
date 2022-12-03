@@ -139,31 +139,7 @@ class ScreeningServiceImplTest {
         assertDoesNotThrow(() -> underTest.createScreening(screeningToSave));
     }
 
-    @Test
-    void testDeleteScreeningShouldThrowIllegalArgumentExceptionWhenScreeningDoesNotExists() {
-        LocalDateTime screeningToDeleteStartTime = LocalDateTime.parse("2002-04-11 16:05", formatter);
 
-        ScreeningDto screeningToDelete = new ScreeningDto("Movie2",
-                "Room",
-                screeningToDeleteStartTime);
-
-        when(screeningRepository.
-                findScreeningByMovieAndRoomAndStartTime(
-                        screeningToDelete.getMovieTitle(),
-                        screeningToDelete.getRoomName(),
-                        screeningToDelete.getStartTime()))
-                .thenReturn(Optional.empty());
-
-        // When
-        // Then
-        assertThrows(IllegalArgumentException.class,
-                () -> underTest.deleteScreening(screeningToDelete));
-
-        verify(screeningRepository).findScreeningByMovieAndRoomAndStartTime(
-                screeningToDelete.getMovieTitle(),
-                screeningToDelete.getRoomName(),
-                screeningToDelete.getStartTime());
-    }
 
     @Test
     void testDeleteScreeningShouldCallRepositoryIfScreeningExists() {

@@ -11,5 +11,5 @@ public class BookingPrice {
     @Id
     private Long id = 1L;
 
-    private Long price=1500L;
+    private Long price = 1500L;
 }

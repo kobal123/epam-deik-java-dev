@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class BookingPriceServiceImpl implements BookingPriceService{
+public class BookingPriceServiceImpl implements BookingPriceService {
 
     private final BookingPriceRepository bookingPriceRepository;
 
