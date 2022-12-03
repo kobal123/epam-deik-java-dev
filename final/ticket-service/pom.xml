@@ -149,8 +149,9 @@
                 <version>${jacoco-maven-plugin.version}</version>
                 <configuration>
                     <excludes>
-                        <exclude>com/epam/training/ticketservice/commands/*</exclude>
-                        <exclude>com/epam/training/ticketservice/configuration/*</exclude>
+                        <exclude>com/epam/training/ticketservice/ui/commands/*</exclude>
+                        <exclude>com/epam/training/ticketservice/ui/configuration/*</exclude>
+                        <exclude>com/epam/training/ticketservice/core/configuration/*</exclude>
                         <exclude>com/epam/training/ticketservice/Application</exclude>
                     </excludes>
                 </configuration>
